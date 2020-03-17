@@ -33,7 +33,7 @@ class GameBoard {
   
   //TESTING ENEMIES
   Enemy[] enemies = new Enemy[3];
-  int enemiesInAction = 3; 
+  int enemiesInAction = 1; 
   
   //TESTING ENEMIES
   boolean initialEnemies = false; 
@@ -96,8 +96,8 @@ class GameBoard {
       
       for(int i = 0; i < 1; i++) {
        enemies[0] = new Ant(0,0); 
-       enemies[1] = new Ant(60,40); 
-       enemies[2] = new Ant(40,80);  
+       //enemies[1] = new Ant(60,40); 
+       //enemies[2] = new Ant(40,80);  
     }
       
     }
@@ -106,14 +106,20 @@ class GameBoard {
   
   
   //this function will call all of the current enemies movement function in order to update their attributes
-  void moveEnemies() {
-    //move the ants
-    System.out.println("Enemies taking a step");
-    for(int i = 0; i < enemiesInAction; i++) {
-      System.out.println("In the loop");
-      enemies[i].move(players[0].getXC(), players[0].getYC());
-    }
+  void moveEnemies(int frame) {
     
+    System.out.println("Frame: "+ frame);
+    
+    //make a decision to move 4 times a second
+    if(frame==0 | frame==10 | frame==20 | frame==30) {
+    
+      //move the ants
+      System.out.println("Enemies taking a step");
+      for(int i = 0; i < enemiesInAction; i++) {
+        System.out.println("In the loop");
+        enemies[i].move(players[0].getXC(), players[0].getYC());
+      }
+    }
     
   }
   
