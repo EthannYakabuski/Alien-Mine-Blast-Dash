@@ -7,6 +7,8 @@ class Player {
   int indexI;
   int indexJ;
   
+  int score = 0; 
+  
   int goldAmount =150; 
   int ironAmount =100; 
   int woodAmount =100;
@@ -37,6 +39,10 @@ class Player {
   }
   void setXSpeed(float s) {
     xSpeed = s;
+  }
+  
+  void setScore(int s) {
+    score = s; 
   }
   
   void addGold(int g) {
@@ -113,7 +119,7 @@ class Player {
     int streamSize = 2800; 
     int start = 0; 
     int bound = 2799; 
-    
+     
     r.ints(streamSize, start, bound);
     
     int i = r.nextInt(39);
@@ -201,6 +207,11 @@ class Player {
     println("indexI after movement: " + indexI); 
     println("indexJ after movement: " + indexJ);
     
+  }
+  
+  void takeDamage(int i) {
+    
+    health = health - i; 
   }
   
   

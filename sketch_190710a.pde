@@ -86,7 +86,7 @@ void draw() {
   //variable keeping track of the current frame
   frameRule = frameRule +1; 
   
-  System.out.println("frameRule: " + frameRule); 
+  //System.out.println("frameRule: " + frameRule); 
   
   //shows game graphics and other
   //important information for the player concerning the game state
@@ -105,6 +105,7 @@ void draw() {
   board.checkBulletRedundancy();
   board.drawBullets();
   board.checkCollisions();
+  board.checkEnemyAntsEating();
   
   
   //update enemy bullets

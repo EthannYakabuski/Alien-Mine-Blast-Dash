@@ -13,6 +13,7 @@ class GameBoard {
   PImage[] imageList; 
   
   int bulletSize = 10; 
+  int score = 0; 
   
   
   //arrays to store items available for build
@@ -32,8 +33,11 @@ class GameBoard {
   //contations all of the enemies currently on the screen
   
   //TESTING ENEMIES
-  Enemy[] enemies = new Enemy[1000];
+  //Enemy[] enemies = new Enemy[1000];
   int enemiesInAction = 1; 
+  
+  ArrayList<Enemy> enemies = new ArrayList<Enemy>(); 
+  
   
   //TESTING ENEMIES
   boolean initialEnemies = false; 
@@ -96,7 +100,7 @@ class GameBoard {
       initialEnemies = true;
       
       for(int i = 0; i < 1; i++) {
-       enemies[0] = new Ant(0,0); 
+       enemies.add(new Ant(0,0)); 
        //enemies[1] = new Ant(60,40); 
        //enemies[2] = new Ant(40,80);  
     }
@@ -108,7 +112,7 @@ class GameBoard {
   //this function will spawn a new enemy somewhere on the map
   void spawnAnEnemy(int frame) {
     
-    System.out.println("Frame: " + frame); 
+    //System.out.println("Frame: " + frame); 
     
     int streamSize = 10; 
     int start = 0; 
@@ -139,9 +143,10 @@ class GameBoard {
         System.out.println("Spawning a new enemy at: (" + spawnX + "," + spawnY + ")"); 
         //determine where the enemy is going to spawn
         //for now just spawn it at (0,0)
-        enemies[enemiesInAction] = new Ant(spawnX, spawnY); 
+        Ant tempAnt = new Ant(spawnX, spawnY);
+        enemies.add(tempAnt); 
         //increment the amount of enemies in action
-        enemiesInAction = enemiesInAction + 1; 
+        //enemiesInAction = enemiesInAction + 1; 
         
         spawner = 0; 
       }
@@ -155,16 +160,16 @@ class GameBoard {
   //this function will call all of the current enemies movement function in order to update their attributes
   void moveEnemies(int frame) {
     
-    System.out.println("Frame: "+ frame);
+    //System.out.println("Frame: "+ frame);
     
     //make a decision to move 4 times a second
     if(frame==0 | frame==10 | frame==20 | frame==30) {
     
       //move the ants
       System.out.println("Enemies taking a step");
-      for(int i = 0; i < enemiesInAction; i++) {
+      for(int i = 0; i < enemies.size(); i++) {
         System.out.println("In the loop");
-        enemies[i].move(players[0].getXC(), players[0].getYC());
+        enemies.get(i).move(players[0].getXC(), players[0].getYC());
       }
     }
     
@@ -172,8 +177,8 @@ class GameBoard {
   
   //this function checks the health of all enemies 
   void checkEnemies() {
-    for(int i = 0; i < enemiesInAction; i++) {
-       if(enemies[i].health <= 0) { enemies[i].status = false; }
+    for(int i = 0; i < enemies.size(); i++) {
+       if(enemies.get(i).health <= 0) { enemies.get(i).status = false; }
     }
     
   }
@@ -181,17 +186,17 @@ class GameBoard {
   //this function will draw all of the current enemies using the new updated attributes
   void showEnemies() {
    
-    for(int i = 0; i < enemiesInAction; i++) {
-      System.out.println("Showing an enemy"); 
-      if(enemies[i].status) {
-        if(enemies[i].health > 75) {
-          image(imageList[16], enemies[i].xC, enemies[i].yC);
-        } else if ( (enemies[i].health <= 75) & (enemies[i].health > 50)) {
-          image(imageList[17], enemies[i].xC, enemies[i].yC);  
-        } else if(enemies[i].health <= 25) {
-          image(imageList[18], enemies[i].xC, enemies[i].yC);
-        } else if(enemies[i].health < 0) {
-          enemies[i].die();
+    for(int i = 0; i < enemies.size(); i++) {
+      //System.out.println("Showing an enemy"); 
+      if(enemies.get(i).status) {
+        if(enemies.get(i).health > 75) {
+          image(imageList[16], enemies.get(i).xC, enemies.get(i).yC);
+        } else if ( (enemies.get(i).health <= 75) & (enemies.get(i).health > 50)) {
+          image(imageList[17], enemies.get(i).xC, enemies.get(i).yC);  
+        } else if(enemies.get(i).health <= 50 & (enemies.get(i).health > 0)) {
+          image(imageList[18], enemies.get(i).xC, enemies.get(i).yC);
+        } else if(enemies.get(i).health <= 0) {
+          enemies.get(i).die();
         }
       
       }
@@ -207,46 +212,99 @@ class GameBoard {
     
   }
   
+  void checkEnemyAntsEating() {
+    
+    //for each enemy
+    for (int i = 0; i < enemies.size(); i++) {
+      
+      int enemyXC = (int) enemies.get(i).getXC();
+      int enemyYC = (int) enemies.get(i).getYC();
+      
+      //switched them by accident somewhere along the line
+      int playerXC = players[0].getYC()*20;
+      int playerYC = players[0].getXC()*20;
+      
+      //System.out.println("Player at: " + playerXC+ "," + playerYC);
+      //System.out.println("Enemy at: " + enemyXC + "," + enemyYC);
+      
+      
+      
+      if((enemyXC == playerXC)&(enemyYC == playerYC)) {
+        System.out.println("COLLISION");
+        
+        //this enemy deals damage to that player if they are on the same square as them
+        enemies.get(i).dealDamage(players[0]);
+        
+        
+      }
+      
+    }
+  
+    
+    
+  }
+  
+  
   //checks every active bullet and every active enemy for collision
   //processor demanding
   void checkCollisions() {
      
-    System.out.println("Checking collisions"); 
+    //System.out.println("Checking collisions"); 
     
     //for each bullet
     for(int i = 0; i < bulletsInAction; i++) {
       
       
       //for each enemy
-      for (int e = 0; e < enemiesInAction; e++) {
+      for (int e = 0; e < enemies.size(); e++) {
        
         //if the bullet is on the visible screen
         if(bullets[i].status) {
           //get the necessary variables in order to check collision
-          float enemyX = enemies[e].xC;    
-          float enemyY = enemies[e].yC;   
+          float enemyX = enemies.get(e).xC;    
+          float enemyY = enemies.get(e).yC;   
         
           float bulletX = bullets[i].xCoor; 
           float bulletY = bullets[i].yCoor;
           
-          System.out.println("Enemy XC: " + enemyX);
-          System.out.println("Enemy YC: " + enemyY);
-          System.out.println("Bullet XC: " + bulletX); 
-          System.out.println("Bullet YC: " + bulletY);
+          //System.out.println("Enemy XC: " + enemyX);
+          //System.out.println("Enemy YC: " + enemyY);
+          //System.out.println("Bullet XC: " + bulletX); 
+          //System.out.println("Bullet YC: " + bulletY);
         
           //testing only
-          System.out.println("Collision: " + collision);
+          //System.out.println("Collision: " + collision);
           //testing only
           
           
           //if the origin of the circle (the bullet) + the radius of the circle is within the square that is occupied by an enemy then there has been a collision
           if(  ( ((enemyX-bulletSize/2) < bulletX) & (bulletX < (enemyX+20+bulletSize/2)) ) & ( ((enemyY-bulletSize/2) < bulletY) & (bulletY < (enemyY+20+bulletSize/2)) ) ) {
             
-            println("There has been a collision");
+            //println("There has been a collision");
             collision = true;
             
             //deal the damage
-            enemies[e].receiveDamage(bullets[i].getDamage());
+            
+            boolean death = false;
+            
+            death = enemies.get(e).receiveDamage(bullets[i].getDamage());
+            
+            //if an enemy death has occured, remove it from the game
+            if(death) {
+              System.out.println("There has been a MURDER");
+              
+              //get the appropriate score to add
+              int addedScore = enemies.get(e).getScore();
+              score = score + addedScore; 
+          
+              //set the players score
+              players[0].setScore(score);
+              
+              //remove the enemy from the game
+              enemies.remove(enemies.get(e));
+              
+            }
+            
           }
          
         
@@ -555,7 +613,7 @@ class GameBoard {
   //displays the heads up display for the user
   void hud(Player player) {
     
-    //START: makes the iron, gold and wood amounts appear
+    //START: makes the iron, gold, wood and score amounts appear
     rectMode(CENTER);
     fill(#E6ED35);
     rect(935,830,50,30);
@@ -578,7 +636,12 @@ class GameBoard {
     fill(0);
     text("Wood",1035,830);
     text(playerone.woodAmount,1100,830);
-    //END: make the iron, gold and wood amounts appear
+    
+    fill(0); 
+    text("Score",1035,870);
+    text(playerone.score,1100,870);
+    
+    //END: make the iron, gold, wood and score amounts appear
     
     //START: makes the build options available
     //show the wood options
