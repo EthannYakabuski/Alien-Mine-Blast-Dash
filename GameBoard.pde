@@ -32,7 +32,7 @@ class GameBoard {
   //contations all of the enemies currently on the screen
   
   //TESTING ENEMIES
-  Enemy[] enemies = new Enemy[3];
+  Enemy[] enemies = new Enemy[1000];
   int enemiesInAction = 1; 
   
   //TESTING ENEMIES
@@ -40,6 +40,7 @@ class GameBoard {
   
   Random r;
   
+  int spawner = 0; 
   
 
   
@@ -101,6 +102,52 @@ class GameBoard {
     }
       
     }
+    
+  }
+  
+  //this function will spawn a new enemy somewhere on the map
+  void spawnAnEnemy(int frame) {
+    
+    System.out.println("Frame: " + frame); 
+    
+    int streamSize = 10; 
+    int start = 0; 
+    int bound = 9; 
+    int xBound = 69;
+    int yBound = 30;
+    int xMin = 0; 
+    int yMin = 0;
+    
+    Random r = new Random(); 
+    
+    r.ints(streamSize, start, bound);
+    
+    int spawnX = r.nextInt(xBound+1-xMin) + xMin;
+    int spawnY = r.nextInt(yBound+1-yMin) + yMin;
+    
+    spawnX = spawnX*20; 
+    spawnY = spawnY*20; 
+    
+    
+    
+    
+    //spawn an enemy every 6 seconds
+    if(frame==0) {
+      spawner = spawner + 1; 
+      
+      if(spawner == 6) {
+        System.out.println("Spawning a new enemy at: (" + spawnX + "," + spawnY + ")"); 
+        //determine where the enemy is going to spawn
+        //for now just spawn it at (0,0)
+        enemies[enemiesInAction] = new Ant(spawnX, spawnY); 
+        //increment the amount of enemies in action
+        enemiesInAction = enemiesInAction + 1; 
+        
+        spawner = 0; 
+      }
+      
+    }
+    
     
   }
   
@@ -705,6 +752,7 @@ class GameBoard {
     
     showImages();
  }
+ 
  
   void createMap() {
     Random r = new Random();

@@ -6,12 +6,15 @@ PImage[] images = new PImage[100];
 int width = 1400;
 int height = 900;
 
+int frameRule; 
 
 
 void setup() {
   
   //setting the framerate
-  frameRate(1);
+  frameRate(30);
+  
+  frameRule = -1;
   
   //tiles
   images[0] = loadImage("tree100.PNG");
@@ -79,15 +82,23 @@ void draw() {
   background(255);
   gridDisplay();
   
+  
+  //variable keeping track of the current frame
+  frameRule = frameRule +1; 
+  
+  System.out.println("frameRule: " + frameRule); 
+  
   //shows game graphics and other
   //important information for the player concerning the game state
   board.hud(playerone);
   board.display();
   board.spawnInitialEnemies();
   
+  
   //updates enemies
   board.checkEnemies();
-  board.moveEnemies();
+  board.moveEnemies(frameRule%30);
+  board.spawnAnEnemy(frameRule%30);
   board.showEnemies();
   
   //updates player bullets
