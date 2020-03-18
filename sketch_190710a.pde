@@ -8,6 +8,10 @@ int height = 900;
 
 int frameRule; 
 
+boolean restartAvailable = false;
+
+boolean potionSickness = false;
+int potionTimer = 0;
 
 void setup() {
   
@@ -105,12 +109,45 @@ void draw() {
   board.checkBulletRedundancy();
   board.drawBullets();
   board.checkCollisions();
+  board.checkLavaDamage();
   board.checkEnemyAntsEating();
   
+  if(potionSickness) {
+     potionTimer = potionTimer + 1; 
+     
+     //animate the potion box
+     board.addPotionAnimateTick(potionTimer);
+       
+     //can only drink a potion every 8 seconds
+     if(potionTimer == 240) {
+       
+       potionTimer = 0; 
+       potionSickness = false;
+     }
+     
+  }
   
-  //update enemy bullets
+  boolean playerDead = board.endGame();
+  
+  
+  //if the player has died end the game
+  if(playerDead) {
+    noLoop();
+    showRestartButton();
+  }
   
 }
+
+void showRestartButton() {
+  restartAvailable = true;
+  
+  fill(0); 
+  rect(0,0,400,400);
+  fill(255);
+  text("RESTART",80,100);
+  
+}
+
 
 void gridDisplay() {
   
@@ -156,7 +193,12 @@ void keyPressed() {
     playerone.keyHandler("4"); 
   }
   else if (key == 53) {
-    playerone.keyHandler("5"); 
+    
+    if(!potionSickness) {
+      potionSickness = true;
+      playerone.keyHandler("5");
+    }
+    
   }
   //handles WASD movement and hotkey bar END
   
@@ -169,6 +211,25 @@ void mousePressed() {
   
   int x = (mouseX/20);
   int y = (mouseY/20);
+  
+  
+  //if the game is in a game over state
+  if(restartAvailable) {
+    
+    if( (mouseX >= 0) & (mouseX <= 400) ) {
+      
+      if( (mouseY >=0) & (mouseY <= 400) ) {
+        
+        restartAvailable = false;
+        board.resetBoardVariables();
+        board.pseudoConstructor();
+        setup();
+        loop();
+      }
+      
+    }
+    
+  }
   
   //proves the clicking is on the correct square
   /*
@@ -196,54 +257,54 @@ void mousePressed() {
 
   //this section holds the code to handle the user clicks in the HUD area
   if(mouseY > 800) {
-    println("The user has clicked the HUD area"); 
+    System.out.println("The user has clicked the HUD area"); 
     
     
     //handles armor upgrade choices
     if(mouseY >= 810 && mouseY <= 830) {
-      println("Armor upgrade chosen"); 
+      System.out.println("Armor upgrade chosen"); 
       
       //handles which tier of armor upgrade was chosen
       if(mouseX >= 1135 && mouseX <= 1185) {
-        println("Wood armor"); 
+        System.out.println("Wood armor"); 
         playerone.applyArmor(1); 
       } else if (mouseX >= 1195 && mouseX <= 1245) {
-        println("Iron armor"); 
+        System.out.println("Iron armor"); 
         playerone.applyArmor(2); 
       } else if (mouseX >= 1255 && mouseX <= 1305) {
-        println("Gold armor");  
+        System.out.println("Gold armor");  
         playerone.applyArmor(3);
       }
       
     //handles tommy gun upgrades  
     } else if (mouseY >= 840 && mouseY <=860) {
-      println("Tommy Gun upgrade chosen"); 
+      System.out.println("Tommy Gun upgrade chosen"); 
       
       //handles which tier of tommy upgrade was chosen
       if(mouseX >= 1135 && mouseX <= 1185) {
-        println("Wood Tommy"); 
+        System.out.println("Wood Tommy"); 
       } else if (mouseX >= 1195 && mouseX <= 1245) {
-        println("Iron Tommy"); 
+        System.out.println("Iron Tommy"); 
         board.giveWeapon("Iron Tommy"); 
       } else if (mouseX >= 1255 && mouseX <= 1305) {
-        println("Gold Tommy");  
+        System.out.println("Gold Tommy");  
         board.giveWeapon("Gold Tommy");
       }
       
       
     //handles shotgun upgrades
     } else if (mouseY >= 870 && mouseY <= 890) {
-      println("Shotgun upgrade chosen"); 
+      System.out.println("Shotgun upgrade chosen"); 
       
       
       //handles which tier of shotgun upgrade was chosen
       if(mouseX >= 1135 && mouseX <= 1185) {
-        println("Wood Shotgun"); 
+        System.out.println("Wood Shotgun"); 
       } else if (mouseX >= 1195 && mouseX <= 1245) {
-        println("Iron Shotgun");
+        System.out.println("Iron Shotgun");
         board.giveWeapon("Iron Shotgun");
       } else if (mouseX >= 1255 && mouseX <= 1305) {
-        println("Gold Shotgun");  
+        System.out.println("Gold Shotgun");  
         board.giveWeapon("Gold Shotgun");
       }
     }

@@ -52,6 +52,7 @@ abstract class Enemy {
   
   boolean receiveDamage(int damage) {
     
+    
     //take the damage off the the enemies health
     this.health = this.health - damage; 
     
@@ -69,11 +70,12 @@ abstract class Enemy {
     
   }
   
-  void dealDamage(Player p) {
+  boolean dealDamage(Player p) {
     if(status) {
-      p.takeDamage(attack);
+      boolean death = p.takeDamage(attack);
+      return death;
     }
-    
+    return false;
   }
   
   //issue: incoming targetX, targetY is in index, not graphics amount
@@ -89,7 +91,7 @@ abstract class Enemy {
       targetY = targetX; 
       targetX = temp;
     
-      System.out.println("Moving");
+      //System.out.println("Moving");
     
       if(this.enemyType == "Ant") { 
       
@@ -104,7 +106,7 @@ abstract class Enemy {
       
         if( (targetX > myLocX)&(targetY > myLocY) ) {
         
-          System.out.println("TOOK A STEP FOR REAL 1"); 
+          //System.out.println("TOOK A STEP FOR REAL 1"); 
         
           this.xC = this.xC+20; 
           this.yC = this.yC+20;
@@ -114,7 +116,7 @@ abstract class Enemy {
         
         } else if ( (targetX > myLocX)&(targetY<myLocY) ) {
         
-          System.out.println("TOOK A STEP FOR REAL 2"); 
+          //System.out.println("TOOK A STEP FOR REAL 2"); 
         
           this.xC = this.xC+20; 
           this.yC = this.yC-20;
@@ -124,7 +126,7 @@ abstract class Enemy {
         
         } else if ( (targetX < myLocX)&(targetY < myLocY) ) {
         
-          System.out.println("TOOK A STEP FOR REAL 3"); 
+          //System.out.println("TOOK A STEP FOR REAL 3"); 
         
           this.xC = this.xC-20; 
           this.yC = this.yC-20;
@@ -134,7 +136,7 @@ abstract class Enemy {
         
       } else if ( (targetX < myLocX)&(targetY > myLocY) ) {
         
-        System.out.println("TOOK A STEP FOR REAL 4"); 
+        //System.out.println("TOOK A STEP FOR REAL 4"); 
         
         this.xC = this.xC-20; 
         this.yC = this.yC+20;
@@ -144,7 +146,7 @@ abstract class Enemy {
         
       } else if ( (targetX == myLocX)&(targetY > myLocY) ) {
         
-        System.out.println("TOOK A STEP FOR REAL 5");
+        //System.out.println("TOOK A STEP FOR REAL 5");
         
         this.yC = this.yC+20; 
         
@@ -152,7 +154,7 @@ abstract class Enemy {
         
       } else if ( (targetX == myLocX)&(targetY < myLocY) ) {
         
-        System.out.println("TOOK A STEP FOR REAL 6");
+        //System.out.println("TOOK A STEP FOR REAL 6");
         
         this.yC = this.yC-20; 
         
@@ -160,7 +162,7 @@ abstract class Enemy {
         
       } else if ( (targetX > myLocX)&(targetY == myLocY) ) {
         
-        System.out.println("TOOK A STEP FOR REAL 7"); 
+        //System.out.println("TOOK A STEP FOR REAL 7"); 
         
         this.xC = this.xC+20;
         
@@ -168,7 +170,7 @@ abstract class Enemy {
         
       } else if ( (targetX < myLocX)&(targetY == myLocY) ) {
         
-        System.out.println("TOOK A STEP FOR REAL 8"); 
+        //System.out.println("TOOK A STEP FOR REAL 8"); 
         
         this.xC = this.xC-20; 
         

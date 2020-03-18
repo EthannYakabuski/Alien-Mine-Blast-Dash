@@ -29,6 +29,9 @@ class GameBoard {
   Bullet[] bullets = new Bullet[20000];
   int bulletsInAction = 0; 
   
+  //difficulty tracker
+  int difficulty = 0; 
+  int difficultyStepper = 6; 
   
   //contations all of the enemies currently on the screen
   
@@ -85,9 +88,9 @@ class GameBoard {
     armorAvailable[2] = new Armor("Gold", "Gold Armor", false, 100, 200, #E6ED35); 
     
     //so far there are three types of each weapon and there are only two types of weapons as per design
-    weaponAvailable[0] = new Weapon("Wood", "Wood Tommy", 3, 4, false, 100, 9, 150, 50, #836835, "Tommy"); 
-    weaponAvailable[1] = new Weapon("Iron", "Iron Tommy", 4, 5, false, 100, 9, 150, 50, #B2A89C, "Tommy");
-    weaponAvailable[2] = new Weapon("Gold", "Gold Tommy", 5, 6, false, 150, 10, 150, 50, #E6ED35, "Tommy");
+    weaponAvailable[0] = new Weapon("Wood", "Wood Tommy", 5, 5, false, 100, 9, 150, 50, #836835, "Tommy"); 
+    weaponAvailable[1] = new Weapon("Iron", "Iron Tommy", 7, 7, false, 100, 9, 150, 50, #B2A89C, "Tommy");
+    weaponAvailable[2] = new Weapon("Gold", "Gold Tommy", 10, 10, false, 150, 10, 150, 50, #E6ED35, "Tommy");
     
     weaponAvailable[3] = new Weapon("Wood", "Wood Shotgun", 75, 150, false, 100, 3, 10, 2, #836835, "Shotgun");
     weaponAvailable[4] = new Weapon("Iron", "Iron Shotgun", 100, 175, false, 100, 3, 10, 2, #B2A89C, "Shotgun");
@@ -114,6 +117,18 @@ class GameBoard {
     
     //System.out.println("Frame: " + frame); 
     
+    difficulty = difficulty + 1; 
+    
+    //after one minute, adjust the spawn rate of ants
+    if(difficulty == 1800) {
+      difficultyStepper = 4; 
+    }
+    
+    //after two minutes, adjust the spawn rate of ants
+    if(difficulty == 3600) {
+      difficultyStepper = 2; 
+    }
+    
     int streamSize = 10; 
     int start = 0; 
     int bound = 9; 
@@ -135,11 +150,11 @@ class GameBoard {
     
     
     
-    //spawn an enemy every 6 seconds
+    //spawn an enemy every 7-8 seconds, then 5-6 seconds, then 3-4 seconds
     if(frame==0) {
       spawner = spawner + 1; 
       
-      if(spawner == 6) {
+      if(spawner == difficultyStepper) {
         System.out.println("Spawning a new enemy at: (" + spawnX + "," + spawnY + ")"); 
         //determine where the enemy is going to spawn
         //for now just spawn it at (0,0)
@@ -166,9 +181,9 @@ class GameBoard {
     if(frame==0 | frame==10 | frame==20 | frame==30) {
     
       //move the ants
-      System.out.println("Enemies taking a step");
+      //System.out.println("Enemies taking a step");
       for(int i = 0; i < enemies.size(); i++) {
-        System.out.println("In the loop");
+        //System.out.println("In the loop");
         enemies.get(i).move(players[0].getXC(), players[0].getYC());
       }
     }
@@ -233,15 +248,138 @@ class GameBoard {
         System.out.println("COLLISION");
         
         //this enemy deals damage to that player if they are on the same square as them
-        enemies.get(i).dealDamage(players[0]);
+        boolean playerDied = enemies.get(i).dealDamage(players[0]);
+        
+        //if the playerDied
+        if(playerDied) {
+          
+          System.out.println("Mission Failed, score: " + score); 
+          
+        }
         
         
       }
+    }  
+  }
+  
+  
+  //called when the player receives fatal damage,
+  boolean endGame() {
+    
+    if(players[0].getHealth() <= 0) {
+      return true;
+    } else {
+      return false; 
+    }
+    
+  }
+  
+  
+  //resets all of the board game variables for game restart
+  void resetBoardVariables() {
+    players[0].reset();
+    
+    plantedTrees = false; 
+    collision = false;
+    
+    bulletSize = 10;
+    score = 0;
+    bulletsInAction = 0;
+    enemiesInAction = 1; 
+    
+    //reset the backing array holding the gameboard state
+    for(int i = 0; i < 40; i++) {
+      for(int j = 0; j < 70; j++) {
+        //tiles[i][j] = null;
+      }
+    }
+    
+    for(int i = 0; i < 10; i++) {
+      players[i] = null;
+    }
+    
+    for(int i = 0; i < 20000; i++) {
+      bullets[i] = null;
+    }
+    
+    for (int i = 0; i < enemies.size(); i++) {
+       enemies.remove(i); 
+    }
+    enemies.clear();
+    
+    initialEnemies = false;
+    spawner = 0; 
+    
+    //difficulty tracker
+    difficulty = 0; 
+    difficultyStepper = 6; 
+    
+  }
+  
+  //checks if the player is standing on any level and if so deals some damage to them
+  void checkLavaDamage() {
+    
+    //System.out.println("Checking lava damage"); 
+    
+    int playerXC = players[0].getXC(); 
+    int playerYC = players[0].getYC();
+    
+    
+    //if the tile the player is standing on is lava
+    if(tiles[playerXC][playerYC].getType().equals("Lava")) {
+      System.out.println("Dealing damage to the player due to lava");
+      players[0].setHealth(players[0].getHealth() - 1);
       
     }
+    
+  }
   
+  //simulates the constructor for this object, for a clean new game state
+  void pseudoConstructor() {
+    
+    //initialize all of the tiles in the array used to represent our gameboard
+    for(int i = 0; i < 40; i++) {
+      
+      for(int j = 0; j < 70; j++) {
+        tiles[i][j] = new Tile();
+      }
+      
+    }
+    
+    //initialize the player array
+    for(int i = 0; i < 10; i++) {
+      players[i] = new Player();
+    }
+    
+    //initialize the bullet array
+    for(int i = 0; i < 20000; i++) {
+      bullets[i] = new Bullet(); 
+    }
     
     
+    //TESTING ENEMIES
+    
+    //TESTING ENEMIES
+    
+    //intialize the armor and weapon arrays
+    
+    //so far there are three types of armor upgrade
+    armorAvailable[0] = new Armor("Wood", "Wood Armor", false, 100, 50, #836835); 
+    armorAvailable[1] = new Armor("Iron", "Iron Armor", false, 100, 100, #B2A89C); 
+    armorAvailable[2] = new Armor("Gold", "Gold Armor", false, 100, 200, #E6ED35); 
+    
+    //so far there are three types of each weapon and there are only two types of weapons as per design
+    weaponAvailable[0] = new Weapon("Wood", "Wood Tommy", 5, 5, false, 100, 9, 150, 50, #836835, "Tommy"); 
+    weaponAvailable[1] = new Weapon("Iron", "Iron Tommy", 7, 7, false, 100, 9, 150, 50, #B2A89C, "Tommy");
+    weaponAvailable[2] = new Weapon("Gold", "Gold Tommy", 10, 10, false, 150, 10, 150, 50, #E6ED35, "Tommy");
+    
+    weaponAvailable[3] = new Weapon("Wood", "Wood Shotgun", 75, 150, false, 100, 3, 10, 2, #836835, "Shotgun");
+    weaponAvailable[4] = new Weapon("Iron", "Iron Shotgun", 100, 175, false, 100, 3, 10, 2, #B2A89C, "Shotgun");
+    weaponAvailable[5] = new Weapon("Gold", "Gold Shotgun", 125, 200, false, 150, 3, 12, 2, #E6ED35, "Shotgun");
+    
+    //difficulty tracker
+    difficulty = 0; 
+    difficultyStepper = 6; 
   }
   
   
@@ -605,6 +743,20 @@ class GameBoard {
     }
   }
   
+  //adds one of 300 ticks to the potion regeneration animation
+  void addPotionAnimateTick(int animateTick) {
+    
+    animateTick = (int) animateTick/3;
+    //for each animateTick that is to be added ontop of the potion box
+    for(int i = 0; i < animateTick; i++) {
+      
+      fill(100); 
+      rect(410,890-i,80,1);
+      
+    }
+    
+  }
+  
   void addPlayer(Player p) {
     players[0] = p;
     players[0].setWeapons(weaponAvailable[0], weaponAvailable[3]);
@@ -671,6 +823,17 @@ class GameBoard {
       
     }
     
+    //set the buildable values of the armor based on the players available materials
+    if(armorAvailable[0].getCost() > players[0].getWoodAmount()) {
+      armorAvailable[0].setBuildable(false); 
+    } 
+    if(armorAvailable[1].getCost() > players[0].getIronAmount()) {
+      armorAvailable[1].setBuildable(false); 
+    }
+    if(armorAvailable[2].getCost() > players[0].getGoldAmount()) {
+      armorAvailable[2].setBuildable(false);
+    }
+    
     //makes the boxes for the available armors to be selected
     for(int i = 0; i < 3; i++) {
       if(armorAvailable[i].buildable) {
@@ -681,6 +844,17 @@ class GameBoard {
       }
     }
     
+    //set the buildable values of the weapons based on the players available materials
+    if(weaponAvailable[0].getCost() > players[0].getWoodAmount()) {
+      weaponAvailable[0].setBuildable(false); 
+    } 
+    if(weaponAvailable[1].getCost() > players[0].getIronAmount()) {
+      weaponAvailable[1].setBuildable(false); 
+    }
+    if(weaponAvailable[2].getCost() > players[0].getGoldAmount()) {
+      weaponAvailable[2].setBuildable(false);
+    }
+    
     //makes the boxes for the available tommy guns to be selected
     for(int i = 0; i < 3; i++) {
       if(weaponAvailable[i].buildable) {
@@ -689,6 +863,17 @@ class GameBoard {
         fill(0);
         text("Tommy", 1140+i*60, 855);
       }
+    }
+    
+    //set the buildable values of the weapons based on the players available materials
+    if(weaponAvailable[3].getCost() > players[0].getWoodAmount()) {
+      weaponAvailable[3].setBuildable(false); 
+    } 
+    if(weaponAvailable[4].getCost() > players[0].getIronAmount()) {
+      weaponAvailable[4].setBuildable(false); 
+    }
+    if(weaponAvailable[5].getCost() > players[0].getGoldAmount()) {
+      weaponAvailable[5].setBuildable(false);
     }
     
     //makes the boxes for the available shot guns to be selected
@@ -921,6 +1106,7 @@ class GameBoard {
     //tiles[0][1].showYourself();
     //tiles[39][69].showYourself();
     
+    System.out.println("map generated"); 
    
     plantTrees();
     

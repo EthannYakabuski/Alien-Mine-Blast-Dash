@@ -9,9 +9,9 @@ class Player {
   
   int score = 0; 
   
-  int goldAmount =150; 
-  int ironAmount =100; 
-  int woodAmount =100;
+  int goldAmount =100; 
+  int ironAmount =200; 
+  int woodAmount =200;
   int active = 0;
   
   Tile activeTile;
@@ -43,6 +43,10 @@ class Player {
   
   void setScore(int s) {
     score = s; 
+  }
+  
+  void setHealth(int h) {
+    health = h; 
   }
   
   void addGold(int g) {
@@ -98,6 +102,7 @@ class Player {
     return activeTommy;
   }
   
+  
   //setters END
   
   //getters START
@@ -113,6 +118,22 @@ class Player {
   
   
   //getters END
+  
+  void reset() {
+  
+    score = 0; 
+  
+    goldAmount =100; 
+    ironAmount =200; 
+    woodAmount =200;
+    active = 0;
+  
+    health = 200;
+    shield = 0;
+    
+    this.startLoc();
+    
+  }
   
   void startLoc() {
     Random r = new Random();
@@ -199,6 +220,7 @@ class Player {
       active = 4;
     } else if (hotkeyFive.equals(key)) {
       active = 5;
+      this.drinkPotion();
     }
     
     indexI = (int)yC/20;
@@ -209,11 +231,49 @@ class Player {
     
   }
   
-  void takeDamage(int i) {
+  void drinkPotion() {
     
-    health = health - i; 
+    this.health = this.health + 50; 
+    if(this.health > 200) { this.health = 200; }
+    
+    
   }
   
+  boolean takeDamage(int i) {
+    
+    int leftover = 0; 
+    
+    //if the amount of damage being received is more than the available shields of the player
+    if(i > this.shield) {
+      
+      //calculate leftover and set shields to 0
+      leftover = i - this.shield;
+      this.shield = 0;
+      
+      //rest of the damage to the health
+      this.health = this.health - leftover; 
+      
+    //the amount of damage being received will only affect the players shields
+    } else if (i <= this.shield) {
+      
+      //remove the damage
+      this.shield = this.shield - i;
+      
+    }
+    
+    return checkDeath();
+    
+  }
+  
+  boolean checkDeath() {
+    
+    if(0 >= this.health) { 
+      return true;
+    } else {
+      return false; 
+    }
+    
+  }
   
   void applyArmor(int i) {
      println("Applying armor to player");  
