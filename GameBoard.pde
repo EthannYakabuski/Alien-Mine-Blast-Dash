@@ -279,9 +279,9 @@ class GameBoard {
         if(enemies.get(i).health > 75) {
           image(imageList[19], enemies.get(i).xC, enemies.get(i).yC);
         } else if ( (enemies.get(i).health <= 75) & (enemies.get(i).health > 50)) {
-          image(imageList[19], enemies.get(i).xC, enemies.get(i).yC);  
+          image(imageList[20], enemies.get(i).xC, enemies.get(i).yC);  
         } else if(enemies.get(i).health <= 50 & (enemies.get(i).health > 0)) {
-          image(imageList[19], enemies.get(i).xC, enemies.get(i).yC);
+          image(imageList[21], enemies.get(i).xC, enemies.get(i).yC);
         } else if(enemies.get(i).health <= 0) {
           enemies.get(i).die();
         }
