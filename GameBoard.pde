@@ -30,7 +30,7 @@ class GameBoard {
   int bulletsInAction = 0; 
   
   //difficulty tracker
-  int difficulty = 5300; 
+  int difficulty = 0; 
   int difficultyStepper = 6; 
   int difficultyStepperFlower = 6;
   
