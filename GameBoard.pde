@@ -29,6 +29,11 @@ class GameBoard {
   Bullet[] bullets = new Bullet[20000];
   int bulletsInAction = 0; 
   
+  
+  //contains all of the flower bullets currently flying through the air
+  ArrayList<FlowerBullet> flowerBullets = new ArrayList<FlowerBullet>();
+  
+  
   //difficulty tracker
   int difficulty = 0; 
   int difficultyStepper = 6; 
@@ -109,7 +114,7 @@ class GameBoard {
       
       for(int i = 0; i < 1; i++) {
        enemies.add(new Ant(0,0)); 
-       enemies.add(new Flower(0,0));
+       enemies.add(new Flower(200,200));
        //enemies[1] = new Ant(60,40); 
        //enemies[2] = new Ant(40,80);  
     }
@@ -297,6 +302,10 @@ class GameBoard {
        bullets[i].checkStatus(); 
     }
     
+    for(int i = 0; i < flowerBullets.size(); i++) {
+       flowerBullets.get(i).checkStatus();
+    }
+    
   }
   
   void checkEnemyAntsEating() {
@@ -332,6 +341,47 @@ class GameBoard {
         
       }
     }  
+  }
+  
+  
+  //for each enemy in the arraylist that needs to shoot, expel their shot
+  void checkEnemiesWhoShoot() {
+    
+    for(int i = 0; i < enemies.size(); i++) {
+      
+      //if the enemy needs to shoot
+      if(enemies.get(i).getShotExpulsion()) {
+        
+        System.out.println("Generating enemy bullet");
+        //create the bullet for the flower enemy type
+        if(enemies.get(i).getEnemyType() == "Flower") {
+          System.out.println("Generating flower bullet"); 
+          
+          
+          //flipped them somewhere along the line
+          int targetXC = players[0].getYC()*20;
+          int targetYC = players[0].getXC()*20;
+          int myXC = (int)enemies.get(i).getXC();
+          int myYC = (int)enemies.get(i).getYC();
+          
+          System.out.println("TargetXC: " + targetXC);
+          System.out.println("TargetYC: " + targetYC);
+          System.out.println("MYXC: " + myXC);
+          System.out.println("MYYC: " + myYC);
+          
+          
+          //add the bullet
+          introduceFlowerBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack());
+      
+          enemies.get(i).setNeedToShoot(false);
+          
+        }
+        
+        
+      }
+      
+    }
+    
   }
   
   
@@ -378,6 +428,11 @@ class GameBoard {
        enemies.remove(i); 
     }
     enemies.clear();
+    
+    for (int i = 0; i < flowerBullets.size(); i++) {
+      flowerBullets.remove(i); 
+    }
+    flowerBullets.clear();
     
     initialEnemies = false;
     spawner = 0; 
@@ -454,6 +509,54 @@ class GameBoard {
     difficultyStepper = 6; 
   }
   
+  //checks if there are any collisions amongst the player and the flower bullets that are still in action
+  void checkFlowerBulletCollisions() {
+    
+    
+    //for each flower bullet that is in action
+    for(int i = 0; i < flowerBullets.size(); i++) {
+      
+      int bulletX = flowerBullets.get(i).getXC();
+      int bulletY = flowerBullets.get(i).getYC(); 
+      
+      //switched them by accident somewhere along the line
+      int playerXC = players[0].getYC()*20;
+      int playerYC = players[0].getXC()*20;
+      
+      
+      //translate the bulletX and bulletY to the index
+      System.out.println("FlowerBulletX: " + bulletX); 
+      System.out.println("FlowerBulletY: " + bulletY); 
+      
+      int timesLoopedX = 0; 
+      int bulletXLooping = bulletX; 
+      
+      int timesLoopedY = 0; 
+      int bulletYLooping = bulletY; 
+      
+      while(bulletXLooping > 0) {
+        bulletXLooping = bulletXLooping - 20;
+        timesLoopedX = timesLoopedX + 1;
+      }
+      
+      while(bulletYLooping > 0) {
+        bulletYLooping = bulletYLooping - 20; 
+        timesLoopedY = timesLoopedY + 1;
+      }
+      
+      
+      System.out.println("Estimating flower bullet location: [" + timesLoopedX + "," + timesLoopedY + "]");
+      
+      if( (timesLoopedX*20 == playerXC) & (timesLoopedY*20 == playerYC)) {
+        System.out.println("There has been damage dealt from a flower bullet to the player"); 
+        players[0].takeDamage(flowerBullets.get(i).getDamage());
+      }
+      
+    }
+    
+    
+  }
+  
   
   //checks every active bullet and every active enemy for collision
   //processor demanding
@@ -528,6 +631,66 @@ class GameBoard {
     
   }
   
+  
+  void introduceFlowerBullet(int shootingAtX, int shootingAtY, int flowerX, int flowerY, int damage) {
+    
+    println("Shooting from (" + flowerX + "," + flowerY + ")");
+    println("Shooting at (" + shootingAtX + "," + shootingAtY + ")");
+    
+    FlowerBullet tempFlowerBullet; 
+    
+    //flower is shooting either up or down
+    if (flowerX == shootingAtX) {
+       
+      //flower is directly shooting downwards
+       if(flowerY < shootingAtY) {
+         
+         //no xSpeed
+         tempFlowerBullet = new FlowerBullet(0,15,10,flowerX,flowerY, damage);
+         
+      
+      //flower is directly shooting updwards
+       } else {
+         
+         //no xSpeed.
+         tempFlowerBullet = new FlowerBullet(0,-15,10,flowerX,flowerY, damage);
+         
+       }
+      
+     
+    //flower is shooting eith left or right  
+    } else {
+      
+      
+      
+      //flower is shooting directly to the left
+      if (flowerX > shootingAtX) {
+        
+        //no ySpeed
+        tempFlowerBullet = new FlowerBullet(-15,0,10,flowerX,flowerY, damage);
+        
+        
+        
+      //flower is shooting directly to the right  
+      } else {
+        
+        //no ySpeed
+        tempFlowerBullet = new FlowerBullet(15,0,10,flowerX,flowerY, damage);
+        
+        
+      }
+      
+      
+      
+    }
+    
+    
+    flowerBullets.add(tempFlowerBullet); 
+  
+        
+  }
+    
+  
   void introduceBullet(int shootingAtX, int shootingAtY, int playerX, int playerY, Weapon weaponUsed) {
     
     println("Shooting from (" + playerX + "," + playerY + ")");
@@ -583,8 +746,8 @@ class GameBoard {
          //get negative Y speed for this case
          ySpeed = ySpeed - ySpeed*2; 
          
-         println("X speed of bullet: " + xSpeed); 
-         println("Y speed of bullet: " + ySpeed); 
+         System.out.println("X speed of bullet: " + xSpeed); 
+         System.out.println("Y speed of bullet: " + ySpeed); 
          
          bullets[bulletsInAction].setSpeedX(xSpeed); 
          bullets[bulletsInAction].setSpeedY(ySpeed);
@@ -632,8 +795,8 @@ class GameBoard {
          //get negative X speed for this case
          xSpeed = xSpeed - xSpeed*2; 
          
-         println("X speed of bullet: " + xSpeed); 
-         println("Y speed of bullet: " + ySpeed); 
+         System.out.println("X speed of bullet: " + xSpeed); 
+         System.out.println("Y speed of bullet: " + ySpeed); 
          
          bullets[bulletsInAction].setSpeedX(xSpeed); 
          bullets[bulletsInAction].setSpeedY(ySpeed);
@@ -678,8 +841,8 @@ class GameBoard {
            ySpeed = yPercentage/10; 
            xSpeed = xPercentage/10;
          
-           println("X speed of bullet: " + xSpeed); 
-           println("Y speed of bullet: " + ySpeed); 
+           System.out.println("X speed of bullet: " + xSpeed); 
+           System.out.println("Y speed of bullet: " + ySpeed); 
            
            bullets[bulletsInAction].setSpeedX(xSpeed); 
            bullets[bulletsInAction].setSpeedY(ySpeed);
@@ -723,8 +886,8 @@ class GameBoard {
            //negative X speed for this case
            xSpeed = xSpeed - xSpeed*2; 
          
-           println("X speed of bullet: " + xSpeed); 
-           println("Y speed of bullet: " + ySpeed); 
+           System.out.println("X speed of bullet: " + xSpeed); 
+           System.out.println("Y speed of bullet: " + ySpeed); 
            
            bullets[bulletsInAction].setSpeedX(xSpeed); 
            bullets[bulletsInAction].setSpeedY(ySpeed);
@@ -742,13 +905,35 @@ class GameBoard {
     
   }
   
+  void drawFlowerBullets() {
+    
+    //for each flower bullet currently in service
+    for(int i = 0; i < flowerBullets.size(); i++) {
+      
+      if(flowerBullets.get(i).getStatus()) {
+      
+ 
+        fill(#F01B1B);
+        
+        flowerBullets.get(i).setXC(flowerBullets.get(i).getXC() + flowerBullets.get(i).getSpeedX()); 
+        flowerBullets.get(i).setYC(flowerBullets.get(i).getYC() + flowerBullets.get(i).getSpeedY());
+        
+        rect(flowerBullets.get(i).getXC()+10, flowerBullets.get(i).getYC()+10, flowerBullets.get(i).getSize()+5, flowerBullets.get(i).getSize()+5);
+      
+      }
+    }
+    
+    
+    
+  }
+  
   
   void drawBullets() {
     
     for(int i = 0; i < bulletsInAction; i++) {
       
         if(bullets[i].status) {
-        fill(#FC0000);
+        fill(#002AF2);
       
         bullets[i].xCoor += (bullets[i].speedX); 
         bullets[i].yCoor += (bullets[i].speedY);

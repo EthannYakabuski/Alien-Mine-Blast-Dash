@@ -121,9 +121,15 @@ void draw() {
   board.drawBullets();
   board.checkCollisions();
   
-  //updates damage to the player
+  //updating damage to the player
+  //environmental damage
   board.checkLavaDamage();
+  
+  //enemy damage
   board.checkEnemyAntsEating();
+  board.checkEnemiesWhoShoot();
+  board.drawFlowerBullets();
+  board.checkFlowerBulletCollisions();
   
   
   //handles potion cooldown animation

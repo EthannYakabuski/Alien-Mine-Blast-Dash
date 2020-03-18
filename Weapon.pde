@@ -34,6 +34,12 @@ class Weapon {
   className = classN;
  }
  
+ 
+ Weapon(String n, int d) {
+   name = n; 
+   maxDamage = d;
+ }
+ 
  //setters
  void setTier(String t) {
    tier = t; 

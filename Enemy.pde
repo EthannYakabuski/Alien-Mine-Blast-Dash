@@ -15,7 +15,10 @@ abstract class Enemy {
   
   int id; 
   
+  int flowerFlop = 0;
+  
   boolean status = true; 
+  boolean needToShoot = false;
   
   Enemy() {
     
@@ -38,6 +41,10 @@ abstract class Enemy {
     return enemyType;  
   }
   
+  boolean getShotExpulsion() {
+    return needToShoot; 
+  }
+  
   int getScore() {
     return score; 
   }
@@ -48,6 +55,15 @@ abstract class Enemy {
   
   float getYC() {
     return yC; 
+  }
+  
+  int getAttack() {
+    return attack; 
+    
+  }
+  
+  void setNeedToShoot(boolean b) {
+    this.needToShoot = b; 
   }
   
   boolean receiveDamage(int damage) {
@@ -81,7 +97,10 @@ abstract class Enemy {
   //issue: incoming targetX, targetY is in index, not graphics amount
   void move(int targetX, int targetY) {
     
+    
     if(this.status) {
+      flowerFlop = flowerFlop + 1;
+      
       //make targetX and targetY into the graphics coordinate not index
       targetX = targetX*20; 
       targetY = targetY*20;
@@ -92,7 +111,11 @@ abstract class Enemy {
       targetX = temp;
     
       //System.out.println("Moving");
+      
+      System.out.println("this.enemyType: " + this.enemyType);
     
+    
+      //movement algorithm for the ant enemy type
       if(this.enemyType == "Ant") { 
       
         int myLocX = (int)this.xC; 
@@ -179,13 +202,188 @@ abstract class Enemy {
       }
       
       
+      //movement algorithm for the flower enemy type
+    } else {
+      
+      //flower moves half as fast as the ants
+      if(0 == (flowerFlop%2)) {
+      
+        int myLocX = (int)this.xC; 
+        int myLocY = (int)this.yC;
+        
+        //System.out.println("MyLocX: " + myLocX); 
+        //System.out.println("MyLocY: " + myLocY); 
+        //System.out.println("TargetX: " + targetX); 
+        //System.out.println("TargetY: " + targetY);
+        
+        /* 1
+        xxxxxxxxxxx
+        xxxMxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxTxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        */
+        if( (targetX > myLocX)&(targetY > myLocY) ) {
+        
+          //System.out.println("TOOK A STEP FOR REAL 1"); 
+        
+          this.xC = this.xC+20; 
+          this.yC = this.yC+20;
+        
+          this.indexI = this.indexI+1; 
+          this.indexJ = this.indexJ+1; 
+        
+        
+        
+        /* 2
+        xxxxxxxxxxx
+        xxxxxxxxxTx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxMxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        */
+        } else if ( (targetX > myLocX)&(targetY<myLocY) ) {
+        
+          //System.out.println("TOOK A STEP FOR REAL 2"); 
+        
+          this.xC = this.xC+20; 
+          this.yC = this.yC-20;
+        
+          this.indexI = this.indexI+1; 
+          this.indexJ = this.indexJ-1; 
+        
+        
+        /* 3
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxTxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxMxx
+        xxxxxxxxxxx
+        */
+        } else if ( (targetX < myLocX)&(targetY < myLocY) ) {
+        
+          //System.out.println("TOOK A STEP FOR REAL 3"); 
+        
+          this.xC = this.xC-20; 
+          this.yC = this.yC-20;
+        
+          this.indexI = this.indexI-1; 
+          this.indexJ = this.indexJ-1; 
+        
+        
+        /* 4
+        xxxxxxxxxxx
+        xxxxxxxxMxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxTxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        */
+      } else if ( (targetX < myLocX)&(targetY > myLocY) ) {
+        
+        //System.out.println("TOOK A STEP FOR REAL 4"); 
+        
+        this.xC = this.xC-20; 
+        this.yC = this.yC+20;
+        
+        this.indexI = this.indexI-1; 
+        this.indexJ = this.indexJ+1; 
+        
+        
+        /* 5
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxMxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxTxxxxxxx
+        xxxxxxxxxxx
+        */
+      } else if ( (targetX == myLocX)&(targetY > myLocY) ) {
+        
+        //flower shoots down the lane
+        System.out.println("Flower shooting");
+        
+        this.needToShoot = true;
+        
+        /* 6
+        xxxxxxxxxxx
+        xxxxTxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxMxxxxxxx
+        xxxxxxxxxxx
+        */
+      } else if ( (targetX == myLocX)&(targetY < myLocY) ) {
+        
+        //flower shoots up the lane
+        System.out.println("Flower shooting");
+        
+        this.needToShoot = true;
+        
+        /* 7
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxMxxxxxTxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        */
+      } else if ( (targetX > myLocX)&(targetY == myLocY) ) {
+        
+        //flower shoots the the right horizontally
+        System.out.println("Flower shooting");
+        
+        this.needToShoot = true;
+        
+        /* 8
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxTxxxxxMxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        xxxxxxxxxxx
+        */
+      } else if ( (targetX < myLocX)&(targetY == myLocY) ) {
+        
+        //flower shoot to the left horizontally
+        System.out.println("Flower shooting");
+        
+        this.needToShoot = true;
+      }
+      
+      
     }
+    
+    
+    }
+    
     }
     
     
     
   }
   
+  
+ 
   void die() {
     System.out.println("Dying"); 
     status = false; 
