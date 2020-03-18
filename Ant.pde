@@ -16,7 +16,5 @@ class Ant extends Enemy {
     super(100, 1, x, y, x/20, y/20, "Ant", 10);
   }
   
-  //the ants movement algorithm specifically
-  
   
 }

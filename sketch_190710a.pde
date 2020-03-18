@@ -46,10 +46,15 @@ void setup() {
   images[15] = loadImage("lenny100.PNG");
   
   //enemies
+  //ants
   images[16] = loadImage("ant100.PNG");
   images[17] = loadImage("ant75.PNG"); 
   images[18] = loadImage("ant50.PNG");
   
+  //flowers
+  images[19] = loadImage("flower100.PNG"); 
+  images[20] = loadImage("flower75.PNG");
+  images[21] = loadImage("flower50.PNG");
   
   images[0].resize(20,20);
   images[1].resize(20,20);
@@ -70,6 +75,10 @@ void setup() {
   images[16].resize(20,20);
   images[17].resize(20,20);
   images[18].resize(20,20);
+  images[19].resize(20,20);
+  images[20].resize(20,20);
+  images[21].resize(20,20);
+  
   
   
   board.imageList = images;
@@ -92,6 +101,7 @@ void draw() {
   
   //System.out.println("frameRule: " + frameRule); 
   
+  
   //shows game graphics and other
   //important information for the player concerning the game state
   board.hud(playerone);
@@ -105,13 +115,18 @@ void draw() {
   board.spawnAnEnemy(frameRule%30);
   board.showEnemies();
   
+  
   //updates player bullets
   board.checkBulletRedundancy();
   board.drawBullets();
   board.checkCollisions();
+  
+  //updates damage to the player
   board.checkLavaDamage();
   board.checkEnemyAntsEating();
   
+  
+  //handles potion cooldown animation
   if(potionSickness) {
      potionTimer = potionTimer + 1; 
      
@@ -123,13 +138,12 @@ void draw() {
        
        potionTimer = 0; 
        potionSickness = false;
-     }
-     
+     } 
   }
   
+  
+  //handles if the game has ended
   boolean playerDead = board.endGame();
-  
-  
   //if the player has died end the game
   if(playerDead) {
     noLoop();

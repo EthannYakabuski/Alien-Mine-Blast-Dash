@@ -30,8 +30,9 @@ class GameBoard {
   int bulletsInAction = 0; 
   
   //difficulty tracker
-  int difficulty = 0; 
+  int difficulty = 5300; 
   int difficultyStepper = 6; 
+  int difficultyStepperFlower = 6;
   
   //contations all of the enemies currently on the screen
   
@@ -45,9 +46,13 @@ class GameBoard {
   //TESTING ENEMIES
   boolean initialEnemies = false; 
   
+  boolean spawningFlowers = false; 
+  
   Random r;
   
   int spawner = 0; 
+  
+  int flowerSpawner = 0;
   
 
   
@@ -104,6 +109,7 @@ class GameBoard {
       
       for(int i = 0; i < 1; i++) {
        enemies.add(new Ant(0,0)); 
+       enemies.add(new Flower(0,0));
        //enemies[1] = new Ant(60,40); 
        //enemies[2] = new Ant(40,80);  
     }
@@ -121,13 +127,42 @@ class GameBoard {
     
     //after one minute, adjust the spawn rate of ants
     if(difficulty == 1800) {
+      //speed up the ant spawn
       difficultyStepper = 4; 
     }
     
     //after two minutes, adjust the spawn rate of ants
     if(difficulty == 3600) {
+      //speed up the ant spawn
       difficultyStepper = 2; 
     }
+    
+    //after 3 minutes, start spawning flower enemies and slow down ant spawns
+    if(difficulty == 5400) {
+      //slow down the ants a bit for now
+      difficultyStepper = 4;
+      spawningFlowers = true;
+    }
+    
+    //after 4 minutes, adjust the spawn rate of ants to be quicker again
+    if(difficulty == 7200) {
+      //speed up the ant spawn
+      difficultyStepper = 2;
+    }
+    
+    //after 5 minutes, adjust the spawn rate of flowers
+    
+    
+    //after 6 minutes, start spawning robots, slow down flowers a bit
+    
+    
+    //after 7 minutes, adjust spawn rate of robots, adjust spawn rate of flowers to be quicker again
+    
+    
+    //after 8 minutes, adjust spawn rate of robots
+    
+    
+    //after 9 minutes, spawn a boss
     
     int streamSize = 10; 
     int start = 0; 
@@ -150,20 +185,41 @@ class GameBoard {
     
     
     
-    //spawn an enemy every 7-8 seconds, then 5-6 seconds, then 3-4 seconds
+    //spawn an enemy ant every 7-8 seconds, then 5-6 seconds, then 3-4 seconds
     if(frame==0) {
       spawner = spawner + 1; 
       
       if(spawner == difficultyStepper) {
-        System.out.println("Spawning a new enemy at: (" + spawnX + "," + spawnY + ")"); 
+        System.out.println("Spawning a new enemy ANT at: (" + spawnX + "," + spawnY + ")"); 
         //determine where the enemy is going to spawn
-        //for now just spawn it at (0,0)
         Ant tempAnt = new Ant(spawnX, spawnY);
+        
         enemies.add(tempAnt); 
         //increment the amount of enemies in action
         //enemiesInAction = enemiesInAction + 1; 
         
+        
+        //reset the ant spawner
         spawner = 0; 
+      }
+      
+    }
+    
+    //spawn an enemy flower every 7-8 seconds
+    if( (frame==0) & spawningFlowers) {
+      flowerSpawner = flowerSpawner + 1;
+      
+      if(flowerSpawner == difficultyStepperFlower) {
+        System.out.println("Spawning a new enemy FLOWER at: (" + spawnX + "," + spawnY + ")");
+        
+        //spawn a flower here
+        Flower tempFlower = new Flower(spawnX, spawnY);
+        
+        //add it to the enemies list
+        enemies.add(tempFlower);
+        
+        //reset the flower spawner
+        flowerSpawner = 0;
       }
       
     }
@@ -203,13 +259,29 @@ class GameBoard {
    
     for(int i = 0; i < enemies.size(); i++) {
       //System.out.println("Showing an enemy"); 
-      if(enemies.get(i).status) {
+      if(enemies.get(i).status & enemies.get(i).getEnemyType().equals("Ant")) {
         if(enemies.get(i).health > 75) {
           image(imageList[16], enemies.get(i).xC, enemies.get(i).yC);
         } else if ( (enemies.get(i).health <= 75) & (enemies.get(i).health > 50)) {
           image(imageList[17], enemies.get(i).xC, enemies.get(i).yC);  
         } else if(enemies.get(i).health <= 50 & (enemies.get(i).health > 0)) {
           image(imageList[18], enemies.get(i).xC, enemies.get(i).yC);
+        } else if(enemies.get(i).health <= 0) {
+          enemies.get(i).die();
+        }
+      
+      }
+    }
+    
+    for(int i = 0; i < enemies.size(); i++) {
+      //System.out.println("Showing an enemy"); 
+      if(enemies.get(i).status & enemies.get(i).getEnemyType().equals("Flower")) {
+        if(enemies.get(i).health > 75) {
+          image(imageList[19], enemies.get(i).xC, enemies.get(i).yC);
+        } else if ( (enemies.get(i).health <= 75) & (enemies.get(i).health > 50)) {
+          image(imageList[19], enemies.get(i).xC, enemies.get(i).yC);  
+        } else if(enemies.get(i).health <= 50 & (enemies.get(i).health > 0)) {
+          image(imageList[19], enemies.get(i).xC, enemies.get(i).yC);
         } else if(enemies.get(i).health <= 0) {
           enemies.get(i).die();
         }
