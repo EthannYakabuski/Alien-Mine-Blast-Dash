@@ -146,17 +146,24 @@ class GameBoard {
     if(difficulty == 5400) {
       //slow down the ants a bit for now
       difficultyStepper = 4;
+      difficultyStepperFlower = 6; 
       spawningFlowers = true;
     }
     
-    //after 4 minutes, adjust the spawn rate of ants to be quicker again
+    //after 4 minutes, adjust the spawn rate of ants to be quicker again, and flowers to be quicker too
     if(difficulty == 7200) {
       //speed up the ant spawn
       difficultyStepper = 2;
+      difficultyStepperFlower = 4; 
+      spawningFlowers = true;
     }
     
     //after 5 minutes, adjust the spawn rate of flowers
-    
+    if(difficulty == 9000) {
+      difficultyStepperFlower = 2;
+      spawningFlowers = true;
+      
+    }
     
     //after 6 minutes, start spawning robots, slow down flowers a bit
     
@@ -214,7 +221,7 @@ class GameBoard {
     if( (frame==0) & spawningFlowers) {
       flowerSpawner = flowerSpawner + 1;
       
-      if(flowerSpawner == difficultyStepperFlower) {
+      if( (flowerSpawner%difficultyStepperFlower) == 0) {
         System.out.println("Spawning a new enemy FLOWER at: (" + spawnX + "," + spawnY + ")");
         
         //spawn a flower here
@@ -223,8 +230,6 @@ class GameBoard {
         //add it to the enemies list
         enemies.add(tempFlower);
         
-        //reset the flower spawner
-        flowerSpawner = 0;
       }
       
     }
