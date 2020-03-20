@@ -13,6 +13,10 @@ boolean restartAvailable = false;
 boolean potionSickness = false;
 int potionTimer = 0;
 
+
+boolean shotGunSickness = false;
+int shotGunTimer = 0;
+
 void setup() {
   
   //setting the framerate
@@ -56,6 +60,11 @@ void setup() {
   images[20] = loadImage("flower75.PNG");
   images[21] = loadImage("flower50.PNG");
   
+  //robots
+  images[22] = loadImage("robot100.PNG"); 
+  images[23] = loadImage("robot75.PNG");
+  images[24] = loadImage("robot50.PNG");
+  
   images[0].resize(20,20);
   images[1].resize(20,20);
   images[2].resize(20,20);
@@ -78,6 +87,9 @@ void setup() {
   images[19].resize(20,20);
   images[20].resize(20,20);
   images[21].resize(20,20);
+  images[22].resize(20,20);
+  images[23].resize(20,20);
+  images[24].resize(20,20);
   
   
   
@@ -117,6 +129,7 @@ void draw() {
   
   
   //updates player bullets
+  board.grantShottyAmmo(frameRule%150);
   board.checkBulletRedundancy();
   board.drawBullets();
   board.checkCollisions();
@@ -130,6 +143,9 @@ void draw() {
   board.checkEnemiesWhoShoot();
   board.drawFlowerBullets();
   board.checkFlowerBulletCollisions();
+  
+  board.drawRobotBullets();
+  board.checkRobotBulletCollisions();
   
   
   //handles potion cooldown animation
@@ -147,7 +163,7 @@ void draw() {
      } 
   }
   
-  
+
   //handles if the game has ended
   boolean playerDead = board.endGame();
   //if the player has died end the game
@@ -210,7 +226,8 @@ void keyPressed() {
     playerone.keyHandler("3"); 
   }
   else if (key == 52) {
-    playerone.keyHandler("4"); 
+    playerone.keyHandler("4");
+    
   }
   else if (key == 53) {
     
@@ -265,7 +282,14 @@ void mousePressed() {
     println(playerone.getXC());
     println(playerone.getYC());
     println("bullet");
-    board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getTommy());  
+    board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getTommy(), false);  
+  }
+  
+  //if the player is click in the board and the shotgun is active
+  if(x < 70 && y < 40 && playerone.active == 2) {
+    
+    board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getTommy(), true);
+    
   }
   
   

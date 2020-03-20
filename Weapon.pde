@@ -60,6 +60,15 @@ class Weapon {
  void setBuildable(boolean b) {
     buildable = b; 
   }
+  
+  
+ void useAmmo(int a) {
+   this.ammo = this.ammo - a;
+ }
+ 
+ void addAmmo(int a) {
+   this.ammo = this.ammo + a;
+ }
  
  //getters
  String getTier() {

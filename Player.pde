@@ -219,7 +219,7 @@ class Player {
     } else if (hotkeyFour.equals(key)) {
       active = 4;
     } else if (hotkeyFive.equals(key)) {
-      active = 5;
+      //active = 5;
       this.drinkPotion();
     }
     

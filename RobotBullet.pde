@@ -1,4 +1,4 @@
-class Bullet {
+class RobotBullet {
   
   float speedX; 
   float speedY;
@@ -6,17 +6,15 @@ class Bullet {
   int speedXMultiple; 
   int speedYMultiple; 
   int size; 
-  int timesAnimated; 
   
   float xCoor; 
   float yCoor; 
   
   int damage; 
-  String shotFrom; 
   
   boolean status = true;
   
-  Bullet() {
+  RobotBullet() {
     speedX = 0; 
     speedY = 0;
     speedXMultiple = 5;
@@ -43,19 +41,42 @@ class Bullet {
     damage = d;
   }
   
-  void setShotFrom(String s) {
-    shotFrom = s; 
+  void setXC(int xc) {
+    xCoor = xc; 
   }
   
+  void setYC(int yc) {
+    yCoor = yc; 
+  }
   
   int getDamage() { 
     return damage; 
   }
   
-  String getShotFrom() {
-    return shotFrom; 
+  int getSpeedX() {
+    return (int)speedX;  
   }
   
+  int getSpeedY() {
+    return (int)speedY; 
+  }
+  
+  int getXC() {
+    return (int)xCoor; 
+  }
+  
+  int getYC() {
+    return (int)yCoor; 
+  }
+  
+  int getSize() {
+    return size; 
+  }
+  
+  boolean getStatus() {
+    return status; 
+  }
+ 
   //determines if the bullet is on the screen or not
   void checkStatus() {
     
@@ -78,13 +99,13 @@ class Bullet {
     
   }
   
-  Bullet(float spX, float spY, int sze, int x, int y) {
+  RobotBullet(float spX, float spY, int sze, int x, int y, int d) {
     speedX = spX;
     speedY = spY; 
     size = sze; 
     xCoor = x; 
     yCoor = y; 
-    
+    damage = d;
   }
   
 }
