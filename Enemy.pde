@@ -20,6 +20,10 @@ abstract class Enemy {
   boolean status = true; 
   boolean needToShoot = false;
   
+  //enemy will move differently when playing in a swarm
+  boolean intelligenceApplied = false; 
+  
+  
   Enemy() {
     
     
@@ -45,6 +49,10 @@ abstract class Enemy {
     return needToShoot; 
   }
   
+  boolean getIntelligence() {
+    return intelligenceApplied; 
+  }
+  
   int getScore() {
     return score; 
   }
@@ -59,6 +67,11 @@ abstract class Enemy {
   
   int getAttack() {
     return attack; 
+    
+  }
+  
+  void setIntelligence(boolean i) {
+    intelligenceApplied = i;
     
   }
   
@@ -737,7 +750,7 @@ abstract class Enemy {
           if(totalDifference >=  10) {
           
               
-             this.xC = this.xC + 20;
+             this.xC = this.xC - 20;
              this.indexI = this.indexI-1; 
         
          

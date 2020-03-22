@@ -91,6 +91,10 @@ class Weapon {
    return cost; 
  }
  
+ int getClipSize() {
+   return clipSize;
+ }
+ 
  boolean getBuildable() {
    return buildable; 
  }

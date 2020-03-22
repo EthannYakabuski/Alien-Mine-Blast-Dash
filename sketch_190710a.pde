@@ -14,7 +14,7 @@ boolean potionSickness = false;
 int potionTimer = 0;
 
 
-boolean shotGunSickness = false;
+//boolean shotGunSickness = false;
 int shotGunTimer = 0;
 
 void setup() {
@@ -119,10 +119,14 @@ void draw() {
   board.hud(playerone);
   board.display();
   board.spawnInitialEnemies();
-  
+  board.checkAnimations();
   
   //updates enemies
   board.checkEnemies();
+  
+  //before you move the enemies apply swarm intelligence
+  board.updateSwarmIntelligence(); 
+  //move all the enemies
   board.moveEnemies(frameRule%30);
   board.spawnAnEnemy(frameRule%30);
   board.showEnemies();
@@ -236,6 +240,24 @@ void keyPressed() {
       playerone.keyHandler("5");
     }
     
+  } else if (key == 101) {
+    playerone.keyHandler("e"); 
+  } else if (key == 114) {
+    playerone.keyHandler("r"); 
+  } else if (key == 116) {
+    playerone.keyHandler("t"); 
+  } else if (key == 102) {
+    playerone.keyHandler("f"); 
+  } else if (key == 103) {
+    playerone.keyHandler("g"); 
+  } else if (key == 104) {
+    playerone.keyHandler("h"); 
+  } else if (key == 99) {
+    playerone.keyHandler("c"); 
+  } else if (key == 118) {
+    playerone.keyHandler("v"); 
+  } else if (key == 98) {
+    playerone.keyHandler("b"); 
   }
   //handles WASD movement and hotkey bar END
   
@@ -288,7 +310,9 @@ void mousePressed() {
   //if the player is click in the board and the shotgun is active
   if(x < 70 && y < 40 && playerone.active == 2) {
     
-    board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getTommy(), true);
+    if(!board.shotGunSickness) {
+      board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getTommy(), true);
+    } 
     
   }
   

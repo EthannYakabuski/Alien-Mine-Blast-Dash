@@ -9,8 +9,8 @@ class Player {
   
   int score = 0; 
   
-  int goldAmount =100; 
-  int ironAmount =200; 
+  int goldAmount =1000; 
+  int ironAmount =1000; 
   int woodAmount =200;
   int active = 0;
   
@@ -123,9 +123,9 @@ class Player {
   
     score = 0; 
   
-    goldAmount =100; 
-    ironAmount =200; 
-    woodAmount =200;
+    goldAmount =0; 
+    ironAmount =0; 
+    woodAmount =100;
     active = 0;
   
     health = 200;
@@ -189,6 +189,20 @@ class Player {
     String hotkeyFour = "4"; 
     String hotkeyFive = "5"; 
     
+    String woodArmor = "e"; 
+    String ironArmor = "r";
+    String goldArmor = "t";
+    
+    String woodTommy = "f"; 
+    String ironTommy = "g"; 
+    String goldTommy = "h";
+    
+    String woodShotty = "c"; 
+    String ironShotty = "v"; 
+    String goldShotty = "b";
+    
+    
+    
     if(forward.equals(key)) {
       //top of the screen boundary
       if(indexI - 1 >= 0) {
@@ -221,6 +235,27 @@ class Player {
     } else if (hotkeyFive.equals(key)) {
       //active = 5;
       this.drinkPotion();
+    } else if (woodArmor.equals(key)) {
+      //apply wooden armor
+      applyArmor(1);
+    } else if (ironArmor.equals(key)) {
+      //apply iron armor
+      applyArmor(2);
+    } else if (goldArmor.equals(key)) {
+      //apply gold armor
+      applyArmor(3);
+    } else if (woodTommy.equals(key)) {
+      
+    } else if (ironTommy.equals(key)) {
+      
+    } else if (goldTommy.equals(key)) {
+      
+    } else if (woodShotty.equals(key)) {
+      
+    } else if (ironShotty.equals(key)) {
+      
+    } else if (goldShotty.equals(key)) {
+      
     }
     
     indexI = (int)yC/20;
@@ -311,7 +346,7 @@ class Player {
      } else if (i == 3 && goldAmount >= 100) {
        println("Applying gold"); 
        shield += 200; 
-       goldAmount = goldAmount - 150;
+       goldAmount = goldAmount - 100;
        if (shield > 200) {
          shield = 200; 
        }
