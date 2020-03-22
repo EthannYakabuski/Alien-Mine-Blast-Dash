@@ -9,8 +9,8 @@ class Player {
   
   int score = 0; 
   
-  int goldAmount =1000; 
-  int ironAmount =1000; 
+  int goldAmount =0; 
+  int ironAmount =0; 
   int woodAmount =200;
   int active = 0;
   
