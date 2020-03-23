@@ -263,6 +263,125 @@ void keyPressed() {
   
 }
 
+void mouseDragged() {
+  
+  println(mouseX);
+  println(mouseY);
+  
+  int x = (mouseX/20);
+  int y = (mouseY/20);
+  
+  
+  //if the game is in a game over state
+  if(restartAvailable) {
+    
+    if( (mouseX >= 0) & (mouseX <= 400) ) {
+      
+      if( (mouseY >=0) & (mouseY <= 400) ) {
+        
+        restartAvailable = false;
+        board.resetBoardVariables();
+        board.pseudoConstructor();
+        setup();
+        loop();
+      }
+      
+    }
+    
+  }
+  
+  //proves the clicking is on the correct square
+  /*
+  if(x < 70 && y < 40) {
+    board.tiles[y][x].showYourself();
+    println("I: " + y);
+    println("J: " + x);
+  }
+  */
+  //SHOOTING
+  //if the player is clicking in the board and the tommy gun is active
+  if(x < 70 && y < 40 && playerone.active == 1) {
+    println(playerone.getXC());
+    println(playerone.getYC());
+    println("bullet");
+    board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getTommy(), false);  
+  }
+  
+  //if the player is click in the board and the shotgun is active
+  if(x < 70 && y < 40 && playerone.active == 2) {
+    
+    if(!board.shotGunSickness) {
+      board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getTommy(), true);
+    } 
+    
+  }
+  
+  
+  
+  //if the player is clicking in the board and the pickaxe is active
+  if(x < 70 && y < 40 && playerone.active == 3) {
+    board.tiles[y][x].clicked(playerone);
+  }
+
+  //this section holds the code to handle the user clicks in the HUD area
+  if(mouseY > 800) {
+    System.out.println("The user has clicked the HUD area"); 
+    
+    
+    //handles armor upgrade choices
+    if(mouseY >= 810 && mouseY <= 830) {
+      System.out.println("Armor upgrade chosen"); 
+      
+      //handles which tier of armor upgrade was chosen
+      if(mouseX >= 1135 && mouseX <= 1185) {
+        System.out.println("Wood armor"); 
+        playerone.applyArmor(1); 
+      } else if (mouseX >= 1195 && mouseX <= 1245) {
+        System.out.println("Iron armor"); 
+        playerone.applyArmor(2); 
+      } else if (mouseX >= 1255 && mouseX <= 1305) {
+        System.out.println("Gold armor");  
+        playerone.applyArmor(3);
+      }
+      
+    //handles tommy gun upgrades  
+    } else if (mouseY >= 840 && mouseY <=860) {
+      System.out.println("Tommy Gun upgrade chosen"); 
+      
+      //handles which tier of tommy upgrade was chosen
+      if(mouseX >= 1135 && mouseX <= 1185) {
+        System.out.println("Wood Tommy"); 
+      } else if (mouseX >= 1195 && mouseX <= 1245) {
+        System.out.println("Iron Tommy"); 
+        board.giveWeapon("Iron Tommy"); 
+      } else if (mouseX >= 1255 && mouseX <= 1305) {
+        System.out.println("Gold Tommy");  
+        board.giveWeapon("Gold Tommy");
+      }
+      
+      
+    //handles shotgun upgrades
+    } else if (mouseY >= 870 && mouseY <= 890) {
+      System.out.println("Shotgun upgrade chosen"); 
+      
+      
+      //handles which tier of shotgun upgrade was chosen
+      if(mouseX >= 1135 && mouseX <= 1185) {
+        System.out.println("Wood Shotgun"); 
+      } else if (mouseX >= 1195 && mouseX <= 1245) {
+        System.out.println("Iron Shotgun");
+        board.giveWeapon("Iron Shotgun");
+      } else if (mouseX >= 1255 && mouseX <= 1305) {
+        System.out.println("Gold Shotgun");  
+        board.giveWeapon("Gold Shotgun");
+      }
+    }
+    
+  }
+  
+  
+}
+
 void mousePressed() {
   
   println(mouseX);
