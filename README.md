@@ -3,6 +3,12 @@
 
 Collect resources to; erect custom defensive structures, buy armor, and upgrade your weapons all while defending yourself against an onslaught of enemies. Enemies will begin to spawn more often, as well as introducing new enemy types, attack and movement vectors. At what score will the boss appear?
 
+HOW TO INSTALL: 
+1. Download the zip of this github and extract to /processing-3.5.4
+2. Navigate to /processing-3.5.4/Alien-Mine-Blast-Dash-master/FortCraft-master
+3. Find file sketch_190710a.pde, right click and open with processing
+4. If this does not work for you please email me at piledrivegames /(@)\ gmail.com (remove extra characters surrounding the @, this is to avoid bots picking up my email address)
+
 HOW TO PLAY:
 Objective: Get the highest score possible
 
