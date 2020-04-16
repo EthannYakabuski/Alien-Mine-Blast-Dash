@@ -1,4 +1,4 @@
-# FortCraft
+# Alien Mine: Blast & Dash
 2D miner/shooter and builder programmed in processing. 
 
 Collect resources to; erect custom defensive structures, buy armor, and upgrade your weapons all while defending yourself against an onslaught of enemies. Enemies will begin to spawn more often, as well as introducing new enemy types, attack and movement vectors. At what score will the boss appear?
