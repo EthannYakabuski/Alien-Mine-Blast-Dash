@@ -9,8 +9,8 @@ class Player {
   
   int score = 0; 
   
-  int goldAmount =0; 
-  int ironAmount =0; 
+  int goldAmount =000; 
+  int ironAmount =000; 
   int woodAmount =200;
   int active = 0;
   
@@ -47,6 +47,11 @@ class Player {
   
   void setHealth(int h) {
     health = h; 
+  }
+  
+  void setShields(int s) {
+    shield = s; 
+    
   }
   
   void addGold(int g) {
@@ -100,6 +105,10 @@ class Player {
   
   Weapon getTommy() {
     return activeTommy;
+  }
+  
+  Weapon getShotty() {
+    return activeShotgun; 
   }
   
   
@@ -175,8 +184,8 @@ class Player {
   //handles WASD movement
   void keyHandler(String key) {
     
-    println("indexI before movement: " + indexI); 
-    println("indexJ before moevement: " + indexJ);
+   // println("indexI before movement: " + indexI); 
+  //  println("indexJ before moevement: " + indexJ);
     
     String forward = "w";
     String left = "a";
@@ -215,12 +224,12 @@ class Player {
       }
     } else if (down.equals(key)) {
       //bottom of the screen boundary
-      if(indexI + 1 < 40) {
+      if(indexI + 1 < 39) {
         setYC(yC+20);
       }
     } else if (right.equals(key)) {
       //right side screen boundary
-      if(indexJ + 1 < 70) {
+      if(indexJ + 1 < 69) {
         setXC(xC+20);
       }
       
@@ -231,7 +240,8 @@ class Player {
     } else if (hotkeyThree.equals(key)) {
       active = 3;
     } else if (hotkeyFour.equals(key)) {
-      active = 4;
+      //active = 4;
+      this.superPower();
     } else if (hotkeyFive.equals(key)) {
       //active = 5;
       this.drinkPotion();
@@ -261,14 +271,20 @@ class Player {
     indexI = (int)yC/20;
     indexJ = (int)xC/20;
     
-    println("indexI after movement: " + indexI); 
-    println("indexJ after movement: " + indexJ);
+    //println("indexI after movement: " + indexI); 
+   // println("indexJ after movement: " + indexJ);
+    
+  }
+  
+  void superPower() {
+    
+    System.out.println("PLAYER USING THEIR POWER"); 
     
   }
   
   void drinkPotion() {
     
-    this.health = this.health + 50; 
+    this.health = this.health + 100; 
     if(this.health > 200) { this.health = 200; }
     
     

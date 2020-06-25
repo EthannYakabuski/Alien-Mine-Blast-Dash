@@ -1,38 +1,40 @@
-class Flower extends Enemy {
+class ElectroDuo extends Enemy {
   
-   PImage[] images = new PImage[3];
   
   //100 health
   //20 attack
   
-  int flowerFlop = 0; 
+  PImage[] images = new PImage[3];
   
-  //for testing spawns a flower (0,0)
-  Flower() {
-    super(100, 2, 0, 0, 0, 0, "Flower", 25);
-    images[0] = loadImage("flower100.PNG"); 
-    images[1] = loadImage("flower75.PNG");
-    images[2] = loadImage("flower50.PNG");
+ 
+  ElectroDuo() {
+    super(500, 10, 0, 0, 0, 0, "ElectroDuo", 25);
     
-    images[0].resize(20,20);
-    images[1].resize(20,20);
-    images[2].resize(20,20);
+    images[0] = loadImage("electroDuo.JPG");
+    images[1] = loadImage("electroDuo75.JPG"); 
+    images[2] = loadImage("electroDuo50.JPG");
+  
+    images[0].resize(40,40);
+    images[1].resize(40,40);
+    images[2].resize(40,40);
   }
   
   
   //for when the location is specified
-  Flower(float x, float y) {
-    super(100, 2, x, y, x/20, y/20, "Flower", 25);
-    images[0] = loadImage("flower100.PNG"); 
-    images[1] = loadImage("flower75.PNG");
-    images[2] = loadImage("flower50.PNG");
+  ElectroDuo(float x, float y) {
+    super(500, 10, x, y, x/20, y/20, "ElectroDuo", 25);
     
-    images[0].resize(20,20);
-    images[1].resize(20,20);
-    images[2].resize(20,20);
+    images[0] = loadImage("electroDuo.JPG");
+    images[1] = loadImage("electroDuo75.JPG"); 
+    images[2] = loadImage("electroDuo50.JPG");
+  
+    images[0].resize(40,40);
+    images[1].resize(40,40);
+    images[2].resize(40,40);
   }
   
-  void show() {
+  
+   void show() {
     
       if(this.health > 75) {
         image(images[0], this.xC, this.yC);
@@ -46,7 +48,6 @@ class Flower extends Enemy {
     
     
   }
-  
   
   void move(int targetX, int targetY) {
     this.flowerFlop = this.flowerFlop + 1; 

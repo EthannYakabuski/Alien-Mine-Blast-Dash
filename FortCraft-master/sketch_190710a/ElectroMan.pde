@@ -1,17 +1,13 @@
-class Ant extends Enemy {
+class ElectroMan extends Enemy {
   
-  PImage[] images = new PImage[3];
-  
-  //100 health
-  //20 attack
-  
-  
-  //for testing spawns an ant (0,0)
-  Ant() {
-    super(100, 1, 0, 0, 0, 0, "Ant", 10);
-    images[0] = loadImage("ant100.PNG");
-    images[1] = loadImage("ant75.PNG"); 
-    images[2] = loadImage("ant50.PNG");
+   PImage[] images = new PImage[3];
+
+  ElectroMan() {
+    super(250, 2, 0, 0, 0, 0, "ElectroMan", 15);
+    
+    images[0] = loadImage("electroMan.JPG");
+    images[1] = loadImage("electroMan75.JPG"); 
+    images[2] = loadImage("electroMan50.JPG");
   
     images[0].resize(20,20);
     images[1].resize(20,20);
@@ -20,11 +16,12 @@ class Ant extends Enemy {
   
   
   //for when the location is specified
-  Ant(float x, float y) {
-    super(100, 1, x, y, x/20, y/20, "Ant", 10);
-    images[0] = loadImage("ant100.PNG");
-    images[1] = loadImage("ant75.PNG"); 
-    images[2] = loadImage("ant50.PNG");
+  ElectroMan(float x, float y) {
+    super(250, 2, x, y, x/20, y/20, "ElectroMan", 15);
+    
+    images[0] = loadImage("electroMan.JPG");
+    images[1] = loadImage("electroMan75.JPG"); 
+    images[2] = loadImage("electroMan50.JPG");
   
     images[0].resize(20,20);
     images[1].resize(20,20);
@@ -32,7 +29,7 @@ class Ant extends Enemy {
   }
   
   
-  void show() {
+   void show() {
     
       if(this.health > 75) {
         image(images[0], this.xC, this.yC);
@@ -47,7 +44,8 @@ class Ant extends Enemy {
     
   }
   
-  void move(int targetX, int targetY) {
+  
+   void move(int targetX, int targetY) {
     
     //make targetX and targetY into the graphics coordinate not index
       targetX = targetX*20; 

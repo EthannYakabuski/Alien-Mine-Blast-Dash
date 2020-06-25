@@ -9,6 +9,8 @@ class Tile {
   int ironamount = 0; 
   int goldamount = 0;
   int woodamount = 0;
+  int superPowerAmount = 0; 
+  int potionUpgradeAmount = 0; 
   boolean clickable = true; 
   boolean hasPlayer = false; 
   PImage currentImage; 
@@ -72,16 +74,21 @@ class Tile {
     println(player.yC);
     
     
-    //allowed to click a tile that is within 2 squares away in any direction
+    //allowed to click a tile that is within 4 squares away in any direction
     
     /*
-    x x x x x x x
-    x a a a a a x        shown here player 'Y' can mine all blocks labeled 'a'
-    x a a a a a x        and only if the tile itself is actually clickable
-    x a a Y a a x
-    x a a a a a x
-    x a a a a a x
-    x x x x x x x
+    
+     x x x x x x x x x x x
+     x x x x x x x x x x x   
+     x a a a a a a a a a x
+     x a a a a a a a a a x       shown here player 'Y' can mine all blocks labeled 'a'
+     x a a a a a a a a a x       and only if the tile itself is actually clickable
+     x a a a a Y a a a a x
+     x a a a a a a a a a x
+     x a a a a a a a a a x
+     x a a a a a a a a a x
+     x x x x x x x x x x x 
+     x x x x x x x x x x x 
     */
     
     if(clickable) {
@@ -104,7 +111,7 @@ class Tile {
        
        //if either of the differences amount to more then 2 blocks away, they cannot click that block
        //the player must also have the pickaxe selected
-       if(iDifference <=2 && jDifference <=2 && player.active == 3) {
+       if(iDifference <=4 && jDifference <=4 && player.active == 3) {
          health = health - 25; 
        
          //tiles that have already been mined are no longer clickable
@@ -178,6 +185,30 @@ class Tile {
     woodamount = 10;
     goldamount = 0;
     ironamount = 0;
+  }
+  
+  void steel() {
+    type = "Steel"; 
+    traversable = true; 
+    clickable = false; 
+    
+    
+  }
+  
+  void superPower() {
+    type = "SuperPower"; 
+    traversable = true; 
+    clickable = true; 
+    superPowerAmount = 1; 
+    
+    
+  }
+  
+  void potionUpgrade() {
+    type = "PotionUpgrade";
+    traversable = true; 
+    clickable = true; 
+    potionUpgradeAmount = 1;
   }
   
  void showYourself() {

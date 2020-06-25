@@ -1,79 +1,56 @@
-class Robot extends Enemy {
+class Phalax extends Enemy {
   
-  PImage[] images = new PImage[3];
-  
+   PImage[] images = new PImage[3];
   
   //100 health
   //20 attack
   
   
-  //for testing spawns a flower (0,0)
-  Robot() {
-    super(150, 3, 0, 0, 0, 0, "Robot", 25);
+  //for testing spawns a Phalax (0,0)
+  Phalax() {
+    super(2000, 20, 0, 0, 0, 0, "Phalax", 250);
     
-    images[0] = loadImage("robot100.PNG"); 
-    images[1] = loadImage("robot75.PNG");
-    images[2] = loadImage("robot50.PNG");
+    images[0] = loadImage("phalax.png");
     
-    images[0].resize(20,20);
-    images[1].resize(20,20);
-    images[2].resize(20,20);
+    
+    images[0].resize(100,100);
   }
   
   
   //for when the location is specified
-  Robot(float x, float y) {
-    super(150, 3, x, y, x/20, y/20, "Robot", 25);
+  Phalax(float x, float y) {
+    super(2000, 20, x, y, x/20, y/20, "Phalax", 250);
     
-    images[0] = loadImage("robot100.PNG"); 
-    images[1] = loadImage("robot75.PNG");
-    images[2] = loadImage("robot50.PNG");
+    images[0] = loadImage("phalax.png");
     
-    images[0].resize(20,20);
-    images[1].resize(20,20);
-    images[2].resize(20,20);
+    
+    images[0].resize(100,100);
   }
-  
   
   void show() {
     
-     if(this.health > 75) {
-        image(images[0], this.xC, this.yC);
-      } else if ( (this.health <= 75) & (this.health > 50)) {
-        image(images[1], this.xC, this.yC);  
-      } else if(this.health <= 50 & (this.health > 0)) {
-        image(images[2], this.xC, this.yC);
-      } else if(this.health <= 0) {
-        this.die();
-      }
-    
+    image(images[0], this.xC, this.yC);
     
   }
   
   
+  //issue: incoming targetX, targetY is in index, not graphics amount
   void move(int targetX, int targetY) {
+      
+      //make targetX and targetY into the graphics coordinate not index
+      targetX = targetX*20; 
+      targetY = targetY*20;
     
-   // System.out.println("Robot MOVING");
-    
-     //make targetX and targetY into the graphics coordinate not index
-    targetX = targetX*20; 
-    targetY = targetY*20;
-    
-    //accidentaly switched them somewhere along the line
-    int temp = targetY; 
-    targetY = targetX; 
-    targetX = temp;
+      //accidentaly switched them somewhere along the line
+      int temp = targetY; 
+      targetY = targetX; 
+      targetX = temp;
       
       
       int myLocX = (int)this.xC; 
-        int myLocY = (int)this.yC;
-        
-        //System.out.println("MyLocX: " + myLocX); 
-        //System.out.println("MyLocY: " + myLocY); 
-        //System.out.println("TargetX: " + targetX); 
-        //System.out.println("TargetY: " + targetY);
-        
-        /* 1
+      int myLocY = (int)this.yC;
+      
+      /* 1
         xxxxxxxxxxx
         xxxMxxxxxxx
         xxxxxxxxxxx
@@ -103,11 +80,11 @@ class Robot extends Enemy {
           //if the target is somewhat far away, move towards them
           if(totalDifference >=  10) {
           
-             this.xC = this.xC+20; 
-             this.yC = this.yC+20;
+             this.xC = this.xC+40; 
+             this.yC = this.yC+40;
         
-             this.indexI = this.indexI+1; 
-             this.indexJ = this.indexJ+1;
+             this.indexI = this.indexI+2; 
+             this.indexJ = this.indexJ+2;
             
           //if the target is close, take shots   
           } else {
@@ -147,11 +124,11 @@ class Robot extends Enemy {
           //if the target is somewhat far away, move towards them
           if(totalDifference >=  10) {
           
-            this.xC = this.xC+20; 
-            this.yC = this.yC-20;
+            this.xC = this.xC+40; 
+            this.yC = this.yC-40;
         
-            this.indexI = this.indexI+1; 
-            this.indexJ = this.indexJ-1; 
+            this.indexI = this.indexI+2; 
+            this.indexJ = this.indexJ-2; 
             
           //if the target is close, take shots   
           } else {
@@ -193,11 +170,11 @@ class Robot extends Enemy {
           //if the target is somewhat far away, move towards them
           if(totalDifference >=  10) {
           
-            this.xC = this.xC-20; 
-            this.yC = this.yC-20;
+            this.xC = this.xC-40; 
+            this.yC = this.yC-40;
         
-            this.indexI = this.indexI-1; 
-            this.indexJ = this.indexJ-1; 
+            this.indexI = this.indexI-2; 
+            this.indexJ = this.indexJ-2; 
          
             
           //if the target is close, take shots   
@@ -240,11 +217,11 @@ class Robot extends Enemy {
         //if the target is somewhat far away, move towards them
           if(totalDifference >=  10) {
           
-             this.xC = this.xC-20; 
-             this.yC = this.yC+20;
+             this.xC = this.xC-40; 
+             this.yC = this.yC+40;
         
-             this.indexI = this.indexI-1; 
-             this.indexJ = this.indexJ+1; 
+             this.indexI = this.indexI-2; 
+             this.indexJ = this.indexJ+2; 
         
          
             
@@ -287,8 +264,8 @@ class Robot extends Enemy {
           if(totalDifference >=  10) {
           
               
-             this.yC = this.yC+20;
-             this.indexJ = this.indexJ+1; 
+             this.yC = this.yC+40;
+             this.indexJ = this.indexJ+2; 
         
          
             
@@ -333,8 +310,8 @@ class Robot extends Enemy {
           if(totalDifference >=  10) {
           
               
-             this.yC = this.yC-20;
-             this.indexJ = this.indexJ-1; 
+             this.yC = this.yC-40;
+             this.indexJ = this.indexJ-2; 
         
          
             
@@ -378,8 +355,8 @@ class Robot extends Enemy {
           if(totalDifference >=  10) {
           
               
-             this.xC = this.xC+20;
-             this.indexI = this.indexI+1; 
+             this.xC = this.xC+40;
+             this.indexI = this.indexI+2; 
         
          
             
@@ -424,8 +401,8 @@ class Robot extends Enemy {
           if(totalDifference >=  10) {
           
               
-             this.xC = this.xC - 20;
-             this.indexI = this.indexI-1; 
+             this.xC = this.xC - 40;
+             this.indexI = this.indexI-2; 
         
          
             
@@ -440,7 +417,12 @@ class Robot extends Enemy {
         
         
       }
+      
+     
+    }
     
-  }
-  
 }
+    
+  
+  
+  

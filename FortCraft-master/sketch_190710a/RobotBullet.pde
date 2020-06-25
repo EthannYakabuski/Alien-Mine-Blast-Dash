@@ -80,19 +80,19 @@ class RobotBullet {
   //determines if the bullet is on the screen or not
   void checkStatus() {
     
-    if (xCoor < 0) {
+    if (xCoor <= 0) {
       this.status = false; 
     }
     
-    if (yCoor < 0) {
+    if (yCoor <= 0) {
       this.status = false; 
     }
     
-    if (xCoor > 1400) {
+    if (xCoor >= 1400) {
       this.status = false; 
     }
     
-    if (yCoor > 800) {
+    if (yCoor >= 800) {
       this.status = false; 
     }
     

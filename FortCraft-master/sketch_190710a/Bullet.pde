@@ -23,6 +23,18 @@ class Bullet {
     speedYMultiple = 5;
   }
   
+  Bullet(float speedXIN, float speedYIN, int shotFromX, int shotFromY, boolean alive, int dmg, String sf) {
+    speedX = speedXIN; 
+    speedY = speedYIN; 
+    xCoor = shotFromX;
+    yCoor = shotFromY; 
+    status = alive; 
+    damage = dmg; 
+    //System.out.println(damage); 
+    shotFrom = sf; 
+    
+  }
+  
   void setSpeedX(float sx) {
     speedX = sx*speedXMultiple; 
   }
@@ -54,6 +66,10 @@ class Bullet {
   
   String getShotFrom() {
     return shotFrom; 
+  }
+  
+  boolean getStatus() { 
+    return status; 
   }
   
   //determines if the bullet is on the screen or not

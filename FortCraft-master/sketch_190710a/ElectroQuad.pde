@@ -1,43 +1,45 @@
-class Robot extends Enemy {
-  
-  PImage[] images = new PImage[3];
+class ElectroQuad extends Enemy {
   
   
   //100 health
   //20 attack
   
+   PImage[] images = new PImage[3];
   
-  //for testing spawns a flower (0,0)
-  Robot() {
-    super(150, 3, 0, 0, 0, 0, "Robot", 25);
+  
+  //for testing spawns an ant (0,0)
+  ElectroQuad() {
+    super(1000, 10, 0, 0, 0, 0, "ElectroQuad", 50);
     
-    images[0] = loadImage("robot100.PNG"); 
-    images[1] = loadImage("robot75.PNG");
-    images[2] = loadImage("robot50.PNG");
     
-    images[0].resize(20,20);
-    images[1].resize(20,20);
-    images[2].resize(20,20);
+    images[0] = loadImage("electroQuad.JPG");
+    images[1] = loadImage("electroQuad75.JPG"); 
+    images[2] = loadImage("electroQuad50.JPG");
+  
+    images[0].resize(40,40);
+    images[1].resize(40,40);
+    images[2].resize(40,40);
   }
   
   
   //for when the location is specified
-  Robot(float x, float y) {
-    super(150, 3, x, y, x/20, y/20, "Robot", 25);
+  ElectroQuad(float x, float y) {
+    super(1000, 10, x, y, x/20, y/20, "ElectroQuad", 50);
     
-    images[0] = loadImage("robot100.PNG"); 
-    images[1] = loadImage("robot75.PNG");
-    images[2] = loadImage("robot50.PNG");
     
-    images[0].resize(20,20);
-    images[1].resize(20,20);
-    images[2].resize(20,20);
+    images[0] = loadImage("electroQuad.JPG");
+    images[1] = loadImage("electroQuad75.JPG"); 
+    images[2] = loadImage("electroQuad50.JPG");
+  
+    images[0].resize(40,40);
+    images[1].resize(40,40);
+    images[2].resize(40,40);
   }
   
   
-  void show() {
+   void show() {
     
-     if(this.health > 75) {
+      if(this.health > 75) {
         image(images[0], this.xC, this.yC);
       } else if ( (this.health <= 75) & (this.health > 50)) {
         image(images[1], this.xC, this.yC);  
@@ -50,10 +52,9 @@ class Robot extends Enemy {
     
   }
   
-  
   void move(int targetX, int targetY) {
     
-   // System.out.println("Robot MOVING");
+  //  System.out.println("Robot MOVING");
     
      //make targetX and targetY into the graphics coordinate not index
     targetX = targetX*20; 
@@ -101,7 +102,7 @@ class Robot extends Enemy {
           int totalDifference = xDifference + yDifference; 
           
           //if the target is somewhat far away, move towards them
-          if(totalDifference >=  10) {
+          if(totalDifference >=  16) {
           
              this.xC = this.xC+20; 
              this.yC = this.yC+20;
@@ -145,7 +146,7 @@ class Robot extends Enemy {
           int totalDifference = xDifference + yDifference; 
           
           //if the target is somewhat far away, move towards them
-          if(totalDifference >=  10) {
+          if(totalDifference >=  16) {
           
             this.xC = this.xC+20; 
             this.yC = this.yC-20;
@@ -191,7 +192,7 @@ class Robot extends Enemy {
           int totalDifference = xDifference + yDifference; 
           
           //if the target is somewhat far away, move towards them
-          if(totalDifference >=  10) {
+          if(totalDifference >=  16) {
           
             this.xC = this.xC-20; 
             this.yC = this.yC-20;
@@ -238,7 +239,7 @@ class Robot extends Enemy {
           
         
         //if the target is somewhat far away, move towards them
-          if(totalDifference >=  10) {
+          if(totalDifference >=  16) {
           
              this.xC = this.xC-20; 
              this.yC = this.yC+20;
@@ -284,7 +285,7 @@ class Robot extends Enemy {
           
         
         //if the target is somewhat far away, move towards them
-          if(totalDifference >=  10) {
+          if(totalDifference >=  16) {
           
               
              this.yC = this.yC+20;
@@ -330,7 +331,7 @@ class Robot extends Enemy {
           
         
         //if the target is somewhat far away, move towards them
-          if(totalDifference >=  10) {
+          if(totalDifference >=  16) {
           
               
              this.yC = this.yC-20;
@@ -375,7 +376,7 @@ class Robot extends Enemy {
           
         
         //if the target is somewhat far away, move towards them
-          if(totalDifference >=  10) {
+          if(totalDifference >=  16) {
           
               
              this.xC = this.xC+20;
@@ -421,7 +422,7 @@ class Robot extends Enemy {
           
         
         //if the target is somewhat far away, move towards them
-          if(totalDifference >=  10) {
+          if(totalDifference >=  16) {
           
               
              this.xC = this.xC - 20;
@@ -442,5 +443,6 @@ class Robot extends Enemy {
       }
     
   }
+  
   
 }

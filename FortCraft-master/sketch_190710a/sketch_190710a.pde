@@ -13,6 +13,8 @@ boolean restartAvailable = false;
 boolean potionSickness = false;
 int potionTimer = 0;
 
+boolean superSickness = false; 
+int superTimer = 0; 
 
 //boolean shotGunSickness = false;
 int shotGunTimer = 0;
@@ -65,6 +67,39 @@ void setup() {
   images[23] = loadImage("robot75.PNG");
   images[24] = loadImage("robot50.PNG");
   
+  
+  //images for the hud
+  images[25] = loadImage("potion.JPG");
+  images[26] = loadImage("pickaxe.JPG");
+  images[27] = loadImage("woodTommy.JPG");
+  images[28] = loadImage("ironTommy.JPG");
+  images[29] = loadImage("goldTommy.JPG");
+  images[30] = loadImage("woodShotty.JPG");
+  images[31] = loadImage("ironShotty.JPG");
+  images[32] = loadImage("goldShotty.JPG");
+  
+  
+  
+  //images for phalax
+  images[33] = loadImage("phalax.png");
+  
+  
+  
+  //images for the steel biome
+  images[34] = loadImage("steel.JPG"); 
+  images[35] = loadImage("steelPotionUpgrade.JPG"); 
+  images[36] = loadImage("steelSuperPower.JPG"); 
+  
+  //images for the base enemies unique to the steel biome
+  images[37] = loadImage("electroMan.JPG"); 
+  images[38] = loadImage("electroDuo.JPG"); 
+  images[39] = loadImage("electroQuad.png");
+  
+  
+  //more images for the hud
+  images[40] = loadImage("superPower.JPG");
+  
+  
   images[0].resize(20,20);
   images[1].resize(20,20);
   images[2].resize(20,20);
@@ -80,7 +115,7 @@ void setup() {
   images[12].resize(20,20);
   images[13].resize(20,20);
   images[14].resize(20,20);
-  images[15].resize(20,20);
+  images[15].resize(40,40);
   images[16].resize(20,20);
   images[17].resize(20,20);
   images[18].resize(20,20);
@@ -91,6 +126,31 @@ void setup() {
   images[23].resize(20,20);
   images[24].resize(20,20);
   
+  
+  images[25].resize(68,68);
+  images[26].resize(68,68);
+  images[27].resize(75,35);
+  images[28].resize(75,35);
+  images[29].resize(75,35);
+  
+  images[30].resize(75,35);
+  images[31].resize(75,35);
+  images[32].resize(75,35);
+  
+  
+  images[33].resize(100,100);
+  
+  
+  //images for the steel biome
+  images[34].resize(20,20); 
+  images[35].resize(20,20); 
+  images[36].resize(20,20);
+  
+  images[37].resize(20,20);
+  images[38].resize(40,40); 
+  images[39].resize(40,40);
+  
+  images[40].resize(68,68);
   
   
   board.imageList = images;
@@ -124,6 +184,8 @@ void draw() {
   //updates enemies
   board.checkEnemies();
   
+  board.checkBiomeSwitch();
+  
   //before you move the enemies apply swarm intelligence
   board.updateSwarmIntelligence(); 
   //move all the enemies
@@ -134,7 +196,7 @@ void draw() {
   
   //updates player bullets
   board.grantShottyAmmo(frameRule%150);
-  board.checkBulletRedundancy();
+  //board.checkBulletRedundancy();
   board.drawBullets();
   board.checkCollisions();
   
@@ -145,11 +207,17 @@ void draw() {
   //enemy damage
   board.checkEnemyAntsEating();
   board.checkEnemiesWhoShoot();
+  
   board.drawFlowerBullets();
   board.checkFlowerBulletCollisions();
   
   board.drawRobotBullets();
   board.checkRobotBulletCollisions();
+  
+  board.checkBulletRedundancy();
+  
+  //board.drawPhalaxBullets();
+  //board.checkPhalaxBulletCollisions();
   
   
   //handles potion cooldown animation
@@ -164,6 +232,22 @@ void draw() {
        
        potionTimer = 0; 
        potionSickness = false;
+     } 
+  }
+  
+  
+  //handles super power cooldown animation
+  if(superSickness) {
+     superTimer = superTimer + 1; 
+     
+     //animate the super power box
+     board.addSuperPowerAnimateTick(superTimer);
+       
+     //can only use super power every 24 seconds
+     if(superTimer == 720) {
+       
+       superTimer = 0; 
+       superSickness = false;
      } 
   }
   
@@ -230,14 +314,23 @@ void keyPressed() {
     playerone.keyHandler("3"); 
   }
   else if (key == 52) {
-    playerone.keyHandler("4");
+    
+    
+    if(!superSickness) {
+      superSickness = true;
+      playerone.keyHandler("4");
+      board.superPowerApplied();
+      
+    }
     
   }
   else if (key == 53) {
     
     if(!potionSickness) {
+      
       potionSickness = true;
       playerone.keyHandler("5");
+      
     }
     
   } else if (key == 101) {
@@ -265,8 +358,8 @@ void keyPressed() {
 
 void mouseDragged() {
   
-  println(mouseX);
-  println(mouseY);
+ // println(mouseX);
+ // println(mouseY);
   
   int x = (mouseX/20);
   int y = (mouseY/20);
@@ -300,18 +393,20 @@ void mouseDragged() {
   */
   //SHOOTING
   //if the player is clicking in the board and the tommy gun is active
-  if(x < 70 && y < 40 && playerone.active == 1) {
-    println(playerone.getXC());
-    println(playerone.getYC());
-    println("bullet");
-    board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getTommy(), false);  
+  if( (x < 70) & (y < 40) & (playerone.active == 1)) {
+    //println(playerone.getXC());
+   // println(playerone.getYC());
+   // println("bullet");
+    if(!board.tommyGunSickness) {
+      board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getTommy(), false, false);  
+    }
   }
   
   //if the player is click in the board and the shotgun is active
-  if(x < 70 && y < 40 && playerone.active == 2) {
+  if( (x < 70) & (y < 40) & (playerone.active == 2)) {
     
     if(!board.shotGunSickness) {
-      board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getTommy(), true);
+      board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getShotty(), true, false);
     } 
     
   }
@@ -384,8 +479,8 @@ void mouseDragged() {
 
 void mousePressed() {
   
-  println(mouseX);
-  println(mouseY);
+ // println(mouseX);
+  //println(mouseY);
   
   int x = (mouseX/20);
   int y = (mouseY/20);
@@ -420,17 +515,19 @@ void mousePressed() {
   //SHOOTING
   //if the player is clicking in the board and the tommy gun is active
   if(x < 70 && y < 40 && playerone.active == 1) {
-    println(playerone.getXC());
-    println(playerone.getYC());
-    println("bullet");
-    board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getTommy(), false);  
+    //println(playerone.getXC());
+    //println(playerone.getYC());
+    //println("bullet");
+    if(!board.tommyGunSickness) {
+      board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getTommy(), false, false); 
+    }
   }
   
   //if the player is click in the board and the shotgun is active
   if(x < 70 && y < 40 && playerone.active == 2) {
     
     if(!board.shotGunSickness) {
-      board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getTommy(), true);
+      board.introduceBullet(x,y, playerone.getYC(), playerone.getXC(), playerone.getShotty(), true, false);
     } 
     
   }

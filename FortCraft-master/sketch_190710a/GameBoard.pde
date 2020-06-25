@@ -2,8 +2,9 @@ import java.util.Random;
 PFont f;
 
 boolean plantedTrees = false;
+boolean plantedTreesInSteel = false; 
 
-boolean collision = false; 
+boolean collision = false;
 
 
 class GameBoard {
@@ -16,6 +17,10 @@ class GameBoard {
   int bulletSize = 10; 
   int score = 0; 
   
+  String currentBiome = "grassland"; 
+  
+  boolean phalaxDeath = false; 
+  
   boolean shotGunSickness = false;
   int shotGunAnimationTick = 0;
   
@@ -25,7 +30,7 @@ class GameBoard {
   //arrays to store items available for build
   //allocated with the max possible amount of available build options because they are very small in size
   Armor[] armorAvailable = new Armor[3];     //wood, iron, gold 
-  Weapon[] weaponAvailable = new Weapon[6]; //wood, iron, gold versions of shotgun and tommy gun respectively
+  Weapon[] weaponAvailable = new Weapon[7]; //wood, iron, gold versions of shotgun and tommy gun respectively
   
   //maximum number of bullets at once is 200,000 if there are any more then this
   
@@ -34,6 +39,8 @@ class GameBoard {
   //contains all of the bullets currently flying through the air
   Bullet[] bullets = new Bullet[20000];
   int bulletsInAction = 0; 
+  
+  ArrayList<Bullet> playerBullets = new ArrayList<Bullet>();
   
   
   //contains all of the flower bullets currently flying through the air
@@ -44,11 +51,21 @@ class GameBoard {
   ArrayList<RobotBullet> robotBullets = new ArrayList<RobotBullet>();
   
   
+  
+  //contains all of the phalax bullets currently flying through the air
+  ArrayList<PhalaxBullet> phalaxBullets = new ArrayList<PhalaxBullet>();
+  
+  
+  
   //difficulty tracker
+  
+  //testing
+  //int difficulty = 14400; 
   int difficulty = 0; 
   int difficultyStepper = 6; 
   int difficultyStepperFlower = 6;
   int difficultyStepperRobot = 6;
+  int difficultyStepperEQuad = 6;
   
   //contations all of the enemies currently on the screen
   
@@ -64,6 +81,7 @@ class GameBoard {
   
   boolean spawningFlowers = false;
   boolean spawningRobots = false;
+  boolean spawningElectroQuads = false;
   
   Random r;
   
@@ -73,6 +91,7 @@ class GameBoard {
   
   int robotSpawner = 0; 
   
+  int electroQuadSpawner = 0; 
 
   
      
@@ -95,9 +114,9 @@ class GameBoard {
     }
     
     //initialize the bullet array
-    for(int i = 0; i < 20000; i++) {
-      bullets[i] = new Bullet(); 
-    }
+    //for(int i = 0; i < 20000; i++) {
+     // bullets[i] = new Bullet(); 
+    //}
     
     
     //TESTING ENEMIES
@@ -111,17 +130,19 @@ class GameBoard {
     armorAvailable[1] = new Armor("Iron", "Iron Armor", false, 100, 100, #B2A89C); 
     armorAvailable[2] = new Armor("Gold", "Gold Armor", false, 100, 200, #E6ED35); 
     
-    //so far there are three types of each weapon and there are only two types of weapons as per design
-    weaponAvailable[0] = new Weapon("Wood", "Wood Tommy", 5, 5, false, 100, 9, 40, 40, #836835, "Tommy"); 
-    weaponAvailable[1] = new Weapon("Iron", "Iron Tommy", 7, 7, false, 100, 9, 50, 50, #B2A89C, "Tommy");
-    weaponAvailable[2] = new Weapon("Gold", "Gold Tommy", 10, 10, false, 100, 10, 60, 60, #E6ED35, "Tommy");
+    //there are three tiers of each weapon, there are only two types of weapons as per design
+    weaponAvailable[0] = new Weapon("Wood", "Wood Tommy", 3, 3, false, 100, 9, 40, 40, #836835, "Tommy"); 
+    weaponAvailable[1] = new Weapon("Iron", "Iron Tommy", 4, 4, false, 100, 9, 50, 50, #B2A89C, "Tommy");
+    weaponAvailable[2] = new Weapon("Gold", "Gold Tommy", 6, 6, false, 100, 10, 60, 60, #E6ED35, "Tommy");
     
-    weaponAvailable[3] = new Weapon("Wood", "Wood Shotgun", 25, 25, false, 100, 3, 10, 2, #836835, "Shotgun");
+    weaponAvailable[3] = new Weapon("Wood", "Wood Shotgun", 200, 25, false, 100, 3, 10, 2, #836835, "Shotgun");
     weaponAvailable[3].ammo = 20;
-    weaponAvailable[4] = new Weapon("Iron", "Iron Shotgun", 50, 50, false, 100, 3, 10, 2, #B2A89C, "Shotgun");
+    weaponAvailable[4] = new Weapon("Iron", "Iron Shotgun", 300, 50, false, 100, 3, 10, 2, #B2A89C, "Shotgun");
     weaponAvailable[4].ammo = 20;
-    weaponAvailable[5] = new Weapon("Gold", "Gold Shotgun", 75, 75, false, 100, 3, 12, 2, #E6ED35, "Shotgun");
+    weaponAvailable[5] = new Weapon("Gold", "Gold Shotgun", 500, 75, false, 100, 3, 12, 2, #E6ED35, "Shotgun");
     weaponAvailable[5].ammo = 20;
+    weaponAvailable[6] = new Weapon("Gold", "Super Power", 100, 100, false, 100, 9, 1000, 1000, #836835, "Superpower");
+    weaponAvailable[6].ammo = 1000;
   }
   
   void spawnInitialEnemies() {
@@ -134,12 +155,38 @@ class GameBoard {
        //enemies.add(new Flower(200,200));
        //enemies[1] = new Ant(60,40); 
        //enemies[2] = new Ant(40,80);  
+      
+       
+       
        //enemies.add(new Robot(100,100));
        //enemies.add(new Ant(0,0)); 
        //enemies.add(new Flower(200,200));
+       //enemies.add(new Phalax(600,400));
+      // enemies.add(new ElectroMan(400,400));
+      // enemies.add(new ElectroDuo(500,400));
+       //enemies.add(new ElectroQuad(300,300));
+       
+       //enemies.add(new Robot(0,0));
+       //enemies.add(new Flower(0,0));
+       //testing a phalax
+      // enemies.add(new Phalax(600,400));
+       
+       //generateBiome();
+       
+       //enemies.add(new ElectroQuad(100,100));
+       
+       
+      
     }
       
     }
+    
+  }
+  
+  void checkBiomeSwitch() {
+    //System.out.println("Hello"); 
+    
+    if(phalaxDeath) { this.generateBiome(); }
     
   }
   
@@ -148,110 +195,189 @@ class GameBoard {
     
     //System.out.println("Frame: " + frame); 
     
+    //we are at the start of a biome
+    if(difficulty == 0) {
+      System.out.println("Biome start");
+      if(currentBiome.equals("steel")) {
+        spawningFlowers = false; 
+        spawningRobots = false;
+        spawningElectroQuads = false;
+        difficultyStepper = 6;
+      }
+      
+    }
+    
     difficulty = difficulty + 1; 
     
     //after one minute, adjust the spawn rate of ants
-    if(difficulty == 1800) {
+    if( (difficulty == 1800)&(currentBiome.equals("grassland"))) {
       //speed up the ant spawn
       difficultyStepper = 4; 
+    } else if ( (difficulty == 1800)&(currentBiome.equals("steel"))) {
+      
+      
+      //after one minute in new biome start spawning electro quads and speed up ants a bit
+      System.out.println("Leveling up correctly in new biome"); 
+      difficultyStepper = 4;
+      spawningRobots = false;
+      //difficultyStepperRobot = 4;
+      spawningElectroQuads = true;
     }
     
     //after two minutes, adjust the spawn rate of ants
-    if(difficulty == 3600) {
+    if( (difficulty == 3600) &(currentBiome.equals("grassland"))) {
       //speed up the ant spawn
       difficultyStepper = 2; 
+    } else if ( (difficulty == 3600)&(currentBiome.equals("steel"))) {
+      
+      
+      //after two minutes in the new biome, start spawning robots again at middle speed, and speed up ants to max
+      System.out.println("Leveling up correctly in new biome"); 
+      difficultyStepper = 2;
+      spawningRobots = true;
+      difficultyStepperRobot = 4;
+      
     }
     
-    //after 3 minutes, start spawning flower enemies and slow down ant spawns
-    if(difficulty == 5400) {
+    //after 3 minutes, start spawning flower enemies
+    if((difficulty == 5400) &(currentBiome.equals("grassland"))) {
       //slow down the ants a bit for now
-      difficultyStepper = 4;
+      difficultyStepper = 2;
       difficultyStepperFlower = 6; 
       spawningFlowers = true;
+    } else if ( (difficulty == 5400)&(currentBiome.equals("steel"))) {
+      
+      
+      //after three minutes in the new biome, start spawning flowers, ants and robots at max speed
+      System.out.println("Leveling up correctly in new biome"); 
+      difficultyStepper = 2;
+      spawningRobots = true;
+      spawningFlowers = true;
+      difficultyStepperFlower = 2;
+      difficultyStepperRobot = 2;
+      
     }
     
-    //after 4 minutes, adjust the spawn rate of ants to be quicker again, and flowers to be quicker too
-    if(difficulty == 7200) {
+    //after 4 minutes, adjust the spawn rate of flowers to be quicker
+    if((difficulty == 7200) &(currentBiome.equals("grassland"))) {
       //speed up the ant spawn
       difficultyStepper = 2;
       difficultyStepperFlower = 4; 
       spawningFlowers = true;
-    }
-    
-    //after 5 minutes, adjust the spawn rate of flowers
-    if(difficulty == 9000) {
-      difficultyStepperFlower = 2;
+    } else if ( (difficulty == 7200)&(currentBiome.equals("steel"))) {
+     
+      
+      //after 4 minutes in the new biome slow down flowers, robots and ants a bit
+      System.out.println("Leveling up correctly in new biome"); 
+      difficultyStepper = 4;
+      spawningRobots = true;
       spawningFlowers = true;
+      difficultyStepperFlower = 4;
+      difficultyStepperRobot = 4;
       
     }
     
-    //after 6 minutes, stop spawning enemies, let player empty the screen
-    if(difficulty == 10800) {
-      difficultyStepper = 100;
-      difficultyStepperFlower = 100; 
+    //after 5 minutes, adjust the spawn rate of flowers to be max
+    if ((difficulty == 9000) &(currentBiome.equals("grassland"))) {
+      difficultyStepperFlower = 2;
+      difficultyStepper = 2;
+      spawningFlowers = true;
+      
+    } else if ( (difficulty == 9000)&(currentBiome.equals("steel"))) {
+      
+      //after 5 minutes in the new biome stop spawning flowers and robots, slow down ants a bit
+      System.out.println("Leveling up correctly in new biome"); 
+      difficultyStepper = 6;
+      spawningRobots = false;
+      spawningFlowers = false;
+      difficultyStepperFlower = 2;
+      difficultyStepperRobot = 2;
+     
+    }
+    
+    //after 6 minutes, stop spawning enemies except for ants, let player empty the screen and grab some more resources
+    if ((difficulty == 10800) &(currentBiome.equals("grassland"))) {
+      //difficultyStepper = 100;\
+      difficultyStepper = 2; 
+      //difficultyStepperFlower = 100; 
       spawningFlowers = false; 
       spawningRobots = false; 
+    } else if ( (difficulty == 10800)&(currentBiome.equals("steel"))) {
+      
+      //after 6 minutes in the new biome, stop spawning electro quads
+      System.out.println("Leveling up correctly in new biome"); 
+      difficultyStepper = 6;
+      spawningElectroQuads = false;
+     
     }
     
     
     //after 7 minutes, start spawning robots
-    if(difficulty == 12600) {
+    if((difficulty == 12600) &(currentBiome.equals("grassland"))) {
       spawningRobots = true;
-      difficultyStepperRobot = 6; 
+      difficultyStepperRobot = 4; 
+      
+    } else if ( (difficulty == 12600)&(currentBiome.equals("steel"))) {
+      
+      //after 7 minutes in the new biome, spawn a MINI BOSS
+      System.out.println("Leveling up correctly in new biome"); 
+      difficultyStepper = 6;
+
+     
     }
     
     
-    //after 8 minutes, start spawning ants and flowers again
-    if(difficulty == 14400) {
-       difficultyStepper = 4; 
-       difficultyStepperFlower = 4; 
+    //after 8 minutes, start spawning flowers again, speed up robots to max
+    if ((difficulty == 14400) &(currentBiome.equals("grassland"))) {
+       difficultyStepper = 2; 
+       difficultyStepperFlower = 4;
+       difficultyStepperRobot = 2;
        spawningFlowers = true; 
+       spawningRobots = true;
     }
     
-    //after 9 minutes, increase ants and flowers to max spawn rate
-    if(difficulty == 16200) {
+    //after 9 minutes, flowers to max spawn rate
+    if ((difficulty == 16200)  &(currentBiome.equals("grassland"))) {
       difficultyStepper = 2; 
       difficultyStepperFlower = 2; 
+      difficultyStepperRobot = 2;
       spawningFlowers = true; 
+      spawningRobots = true;
     }
     
-    //after 10 minutes, start spawning more robots
-    if(difficulty == 18000) {
-      difficultyStepperRobot = 4; 
-    }
-    
-    //after 11 minutes, max spawn rate of robots
-    if(difficulty == 19800) {
-      difficultyStepperRobot = 2;  
-    }
-    
-    //after 12 minutes, stop spawning robots
-    if(difficulty == 21600) {
-      spawningRobots = false; 
-    }
-    
-    //after 13 minutes, stop spawning other enemies let player clear the screen
-    if(difficulty == 23400) {
+    //10 minutes
+    //stop spawning flowers and robots, ants at max spawn rate
+    //spawn a phalax
+    if ((difficulty == 18000) &(currentBiome.equals("grassland"))) {
       spawningFlowers = false; 
-      difficultyStepper = 100;
+      spawningRobots = false; 
+      difficultyStepper = 2; 
+      
+       int streamSize = 10; 
+      int start = 0; 
+      int bound = 9; 
+      int xBound = 69;
+      int yBound = 30;
+      int xMin = 0; 
+      int yMin = 0;
+    
+      Random r = new Random(); 
+    
+      r.ints(streamSize, start, bound);
+      int spawnX = r.nextInt(xBound+1-xMin) + xMin;
+      int spawnY = r.nextInt(yBound+1-yMin) + yMin;
+    
+      spawnX = spawnX*20; 
+      spawnY = spawnY*20; 
+      
+      Phalax tempPhalax = new Phalax(spawnX, spawnY);
+      enemies.add(tempPhalax);
       
     }
     
-    //after 14 minutes continue spawning all enemies at max rate
+  
     
-    
-    //after 10,000 score spawn a Phalax
-    
-    
-    //after Phalax is half health start spawning ants again at max speed, and flowers somewhat slow
-    
-    
-    //after Phalax is 1/3 health, stop spawning all enemies
-    
-    
-    //after the user beats the Phalax, award score and enter ENDLESS MODE
-    
-    int streamSize = 10; 
+    int streamSize = 5; 
     int start = 0; 
     int bound = 9; 
     int xBound = 69;
@@ -315,14 +441,43 @@ class GameBoard {
     if( (frame==0) & spawningRobots) {
       robotSpawner = robotSpawner + 1;
       
+      int spawnRobotX = r.nextInt(xBound+1-xMin) + xMin;
+      int spawnRobotY = r.nextInt(yBound+1-yMin) + yMin;
+      
+      spawnRobotX = spawnRobotX*20; 
+      spawnRobotY = spawnRobotY*20; 
+      
       if( (robotSpawner%difficultyStepperRobot) == 0) {
-        System.out.println("Spawning a new enemy ROBOT at: (" + spawnX + "," + spawnY + ")");
+        System.out.println("Spawning a new enemy ROBOT at: (" + spawnRobotX + "," + spawnRobotY + ")");
         
-        //spawn a flower here
-        Robot tempRobot = new Robot(spawnX, spawnY);
+        //spawn a robot here
+        Robot tempRobot = new Robot(spawnRobotX, spawnRobotY);
         
         //add it to the enemies list
         enemies.add(tempRobot);
+        
+      }
+      
+    }
+    
+    
+    if( (frame==0) & spawningElectroQuads) {
+      electroQuadSpawner = electroQuadSpawner + 1;
+      
+      int spawnEQuadX = r.nextInt(xBound+1-xMin) + xMin;
+      int spawnEQuadY = r.nextInt(yBound+1-yMin) + yMin;
+      
+      spawnEQuadX = spawnEQuadX*20; 
+      spawnEQuadY = spawnEQuadY*20; 
+      
+      if( (electroQuadSpawner%difficultyStepperEQuad) == 0) {
+        System.out.println("Spawning a new enemy ROBOT at: (" + spawnEQuadX + "," + spawnEQuadY + ")");
+        
+        //spawn a robot here
+        ElectroQuad tempElectroQuad = new ElectroQuad(spawnEQuadX, spawnEQuadY);
+        
+        //add it to the enemies list
+        enemies.add(tempElectroQuad);
         
       }
       
@@ -338,7 +493,7 @@ class GameBoard {
     //System.out.println("Frame: "+ frame);
     
     //make a decision to move 4 times a second
-    if(frame==0 | frame==10 | frame==20 | frame==30) {
+    if(frame==0 || frame==5 || frame==10 || frame==15 || frame==20 || frame==25 || frame==30) {
     
       //move the ants
       //System.out.println("Enemies taking a step");
@@ -353,76 +508,71 @@ class GameBoard {
   //this function checks the health of all enemies 
   void checkEnemies() {
     for(int i = 0; i < enemies.size(); i++) {
-       if(enemies.get(i).health <= 0) { enemies.get(i).status = false; }
+       if(enemies.get(i).health <= 0) { 
+       
+        if(enemies.get(i).getEnemyType().equals("Phalax")) {
+          System.out.println("BIOME SWITCH");
+          
+          
+          phalaxDeath = true; 
+          
+         
+        }
+        enemies.get(i).status = false; 
+        enemies.remove(enemies.get(i)); 
+     }
     }
     
   }
   
+  
+  
   //this function will draw all of the current enemies using the new updated attributes
   void showEnemies() {
-   
-    for(int i = 0; i < enemies.size(); i++) {
-      //System.out.println("Showing an enemy"); 
-      if(enemies.get(i).status & enemies.get(i).getEnemyType().equals("Ant")) {
-        if(enemies.get(i).health > 75) {
-          image(imageList[16], enemies.get(i).xC, enemies.get(i).yC);
-        } else if ( (enemies.get(i).health <= 75) & (enemies.get(i).health > 50)) {
-          image(imageList[17], enemies.get(i).xC, enemies.get(i).yC);  
-        } else if(enemies.get(i).health <= 50 & (enemies.get(i).health > 0)) {
-          image(imageList[18], enemies.get(i).xC, enemies.get(i).yC);
-        } else if(enemies.get(i).health <= 0) {
-          enemies.get(i).die();
-        }
-      
-      }
-    }
+    
+   // System.out.println("Enemies.size(): " + enemies.size()); 
+    
     
     for(int i = 0; i < enemies.size(); i++) {
-      //System.out.println("Showing an enemy"); 
-      if(enemies.get(i).status & enemies.get(i).getEnemyType().equals("Flower")) {
-        if(enemies.get(i).health > 75) {
-          image(imageList[19], enemies.get(i).xC, enemies.get(i).yC);
-        } else if ( (enemies.get(i).health <= 75) & (enemies.get(i).health > 50)) {
-          image(imageList[20], enemies.get(i).xC, enemies.get(i).yC);  
-        } else if(enemies.get(i).health <= 50 & (enemies.get(i).health > 0)) {
-          image(imageList[21], enemies.get(i).xC, enemies.get(i).yC);
-        } else if(enemies.get(i).health <= 0) {
-          enemies.get(i).die();
-        }
       
-      }
+      enemies.get(i).show();
+      
     }
+      
     
-    for(int i = 0; i < enemies.size(); i++) {
-      //System.out.println("Showing an enemy"); 
-      if(enemies.get(i).status & enemies.get(i).getEnemyType().equals("Robot")) {
-        if(enemies.get(i).health > 100) {
-          image(imageList[22], enemies.get(i).xC, enemies.get(i).yC);
-        } else if ( (enemies.get(i).health <= 100) & (enemies.get(i).health > 50)) {
-          image(imageList[23], enemies.get(i).xC, enemies.get(i).yC);  
-        } else if(enemies.get(i).health <= 50 & (enemies.get(i).health > 0)) {
-          image(imageList[24], enemies.get(i).xC, enemies.get(i).yC);
-        } else if(enemies.get(i).health <= 0) {
-          enemies.get(i).die();
-        }
-      
-      }
-    }
     
   }
   
   //turns status to false of all bullets that are off the screen
   void checkBulletRedundancy() {
-    for(int i = 0; i < bulletsInAction; i++) {
-       bullets[i].checkStatus(); 
+    for(int i = 0; i < playerBullets.size(); i++) {
+       playerBullets.get(i).checkStatus(); 
+       
+       if(playerBullets.get(i).getStatus() == false) {
+         playerBullets.remove(playerBullets.get(i));
+       }
     }
     
     for(int i = 0; i < flowerBullets.size(); i++) {
        flowerBullets.get(i).checkStatus();
+       
+       
+       if(flowerBullets.get(i).getStatus() == false) {
+         flowerBullets.remove(flowerBullets.get(i));
+       }
+       
     }
     
     for(int i = 0; i < robotBullets.size(); i++) {
        robotBullets.get(i).checkStatus();
+       
+       if(robotBullets.get(i).getStatus() == false) {
+         robotBullets.remove(robotBullets.get(i));
+       }
+    }
+    
+     for(int i = 0; i < phalaxBullets.size(); i++) {
+       phalaxBullets.get(i).checkStatus();
     }
       
     
@@ -451,10 +601,10 @@ class GameBoard {
       
       
       if((enemyXC == playerXC)&(enemyYC == playerYC)) {
-        System.out.println("COLLISION");
+       // System.out.println("COLLISION");
         
         //this enemy deals damage to that player if they are on the same square as them
-        if(enemies.get(i).enemyType == "Ant") {
+        if(enemies.get(i).enemyType == "Ant" || enemies.get(i).enemyType == "ElectroMan") {
         boolean playerDied = enemies.get(i).dealDamage(players[0]);
         
         //if the playerDied
@@ -464,12 +614,58 @@ class GameBoard {
           
         }
         }
+      }
       
+      if((enemyXC == playerXC+20)&(enemyYC == playerYC)) {
+       // System.out.println("COLLISION");
         
+        //this enemy deals damage to that player if they are on the same square as them
+        if(enemies.get(i).enemyType == "Ant" || enemies.get(i).enemyType == "ElectroMan") {
+        boolean playerDied = enemies.get(i).dealDamage(players[0]);
         
+        //if the playerDied
+        if(playerDied) {
+          
+          System.out.println("Mission Failed, score: " + score); 
+          
+        }
+        }
+      }
+      
+      if((enemyXC == playerXC+20)&(enemyYC == playerYC+20)) {
+       // System.out.println("COLLISION");
+        
+        //this enemy deals damage to that player if they are on the same square as them
+        if(enemies.get(i).enemyType == "Ant" || enemies.get(i).enemyType == "ElectroMan") {
+        boolean playerDied = enemies.get(i).dealDamage(players[0]);
+        
+        //if the playerDied
+        if(playerDied) {
+          
+          System.out.println("Mission Failed, score: " + score); 
+          
+        }
+        }
+      }
+      
+      if((enemyXC == playerXC)&(enemyYC == playerYC+20)) {
+       // System.out.println("COLLISION");
+        
+        //this enemy deals damage to that player if they are on the same square as them
+        if(enemies.get(i).enemyType == "Ant" || enemies.get(i).enemyType == "ElectroMan") {
+        boolean playerDied = enemies.get(i).dealDamage(players[0]);
+        
+        //if the playerDied
+        if(playerDied) {
+          
+          System.out.println("Mission Failed, score: " + score); 
+          
+        }
+        }
       }
     }  
   }
+  
   
   
   //for each enemy in the arraylist that needs to shoot, expel their shot
@@ -480,10 +676,10 @@ class GameBoard {
       //if the enemy needs to shoot
       if(enemies.get(i).getShotExpulsion()) {
         
-        System.out.println("Generating enemy bullet");
+        //System.out.println("Generating enemy bullet");
         //create the bullet for the flower enemy type
-        if(enemies.get(i).getEnemyType() == "Flower") {
-          System.out.println("Generating flower bullet"); 
+        if(enemies.get(i).getEnemyType() == "Flower" || enemies.get(i).enemyType == "ElectroDuo") {
+          //System.out.println("Generating flower bullet"); 
           
           
           //flipped them somewhere along the line
@@ -492,25 +688,31 @@ class GameBoard {
           int myXC = (int)enemies.get(i).getXC();
           int myYC = (int)enemies.get(i).getYC();
           
-          System.out.println("TargetXC: " + targetXC);
-          System.out.println("TargetYC: " + targetYC);
-          System.out.println("MYXC: " + myXC);
-          System.out.println("MYYC: " + myYC);
+          //System.out.println("TargetXC: " + targetXC);
+          //System.out.println("TargetYC: " + targetYC);
+         // System.out.println("MYXC: " + myXC);
+         // System.out.println("MYYC: " + myYC);
           
           
           //add the bullet
-          if(enemies.get(i).enemyType == "Flower") {
-            introduceFlowerBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack()+7);
+          if(enemies.get(i).enemyType == "Flower" || enemies.get(i).enemyType == "ElectroDuo") {
+            
+            if(enemies.get(i).enemyType == "Flower") {
+              introduceFlowerBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack()+7, false);
+            } else { 
+              introduceFlowerBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack()+7, true);
+            }
+            
           } else if (enemies.get(i).enemyType == "Robot") {
-            introduceRobotBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack()+7);
+            introduceRobotBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack()+3, false);
           }
           
       
           enemies.get(i).setNeedToShoot(false);
           
-        } else if (enemies.get(i).getEnemyType() == "Robot") {
+        } else if ( (enemies.get(i).getEnemyType() == "Robot") || (enemies.get(i).getEnemyType() == "ElectroQuad")) {
           
-          System.out.println("Generating robot bullet"); 
+         // System.out.println("Generating robot bullet"); 
           
           
           //flipped them somewhere along the line
@@ -519,26 +721,58 @@ class GameBoard {
           int myXC = (int)enemies.get(i).getXC();
           int myYC = (int)enemies.get(i).getYC();
           
-          System.out.println("TargetXC: " + targetXC);
-          System.out.println("TargetYC: " + targetYC);
-          System.out.println("MYXC: " + myXC);
-          System.out.println("MYYC: " + myYC);
+        //  System.out.println("TargetXC: " + targetXC);
+        //  System.out.println("TargetYC: " + targetYC);
+        //  System.out.println("MYXC: " + myXC);
+        //  System.out.println("MYYC: " + myYC);
           
           
           //add the bullet
           if(enemies.get(i).enemyType == "Flower") {
-            introduceFlowerBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack()+7);
-          } else if (enemies.get(i).enemyType == "Robot") {
-            introduceRobotBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack()+7);
+            introduceFlowerBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack()+7, false);
+          } else if (enemies.get(i).enemyType == "Robot" || enemies.get(i).enemyType == "ElectroQuad") {
+            if(enemies.get(i).enemyType == "Robot") { 
+              introduceRobotBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack()+3, false);
+            } else { 
+              introduceRobotBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack()+3, true);
+            }
           }
           
       
           enemies.get(i).setNeedToShoot(false);
           
           
-        }
+        } else if (enemies.get(i).getEnemyType() == "Phalax") {
+          
+        //  System.out.println("Generating Phalax bullet"); 
+          
+          
+          //flipped them somewhere along the line
+          int targetXC = players[0].getYC()*20;
+          int targetYC = players[0].getXC()*20;
+          int myXC = (int)enemies.get(i).getXC();
+          int myYC = (int)enemies.get(i).getYC();
+          
+        //  System.out.println("TargetXC: " + targetXC);
+        //  System.out.println("TargetYC: " + targetYC);
+        //  System.out.println("MYXC: " + myXC);
+        //  System.out.println("MYYC: " + myYC);
+          
+          
+          //add the bullet
+          if(enemies.get(i).enemyType == "Flower") {
+            introduceFlowerBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack()+7, false);
+          } else if (enemies.get(i).enemyType == "Robot") {
+            introduceRobotBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack()+3, false);
+          } else if (enemies.get(i).enemyType == "Phalax") {
+            introducePhalaxBullet(targetXC, targetYC, myXC, myYC, enemies.get(i).getAttack()+3);
+          }
+      
+          enemies.get(i).setNeedToShoot(false);
         
         
+      }
+      
       }
       
     }
@@ -563,6 +797,7 @@ class GameBoard {
     players[0].reset();
     
     plantedTrees = false; 
+    plantedTreesInSteel = false; 
     collision = false;
     
     bulletSize = 10;
@@ -608,6 +843,7 @@ class GameBoard {
     difficultyStepper = 6;
     difficultyStepperFlower = 6;
     difficultyStepperRobot = 6;
+    difficultyStepperEQuad = 6; 
     spawningFlowers = false;
     spawningRobots = false;
     
@@ -624,6 +860,24 @@ class GameBoard {
     
     //if the tile the player is standing on is lava
     if(tiles[playerXC][playerYC].getType().equals("Lava")) {
+      System.out.println("Dealing damage to the player due to lava");
+      players[0].setHealth(players[0].getHealth() - 1);
+      
+    }
+    
+    if(tiles[playerXC+1][playerYC].getType().equals("Lava")) {
+      System.out.println("Dealing damage to the player due to lava");
+      players[0].setHealth(players[0].getHealth() - 1);
+      
+    }
+    
+    if(tiles[playerXC+1][playerYC+1].getType().equals("Lava")) {
+      System.out.println("Dealing damage to the player due to lava");
+      players[0].setHealth(players[0].getHealth() - 1);
+      
+    }
+    
+    if(tiles[playerXC][playerYC+1].getType().equals("Lava")) {
       System.out.println("Dealing damage to the player due to lava");
       players[0].setHealth(players[0].getHealth() - 1);
       
@@ -666,9 +920,9 @@ class GameBoard {
     armorAvailable[2] = new Armor("Gold", "Gold Armor", false, 100, 200, #E6ED35); 
     
     //so far there are three types of each weapon and there are only two types of weapons as per design
-    weaponAvailable[0] = new Weapon("Wood", "Wood Tommy", 5, 5, false, 100, 9, 150, 50, #836835, "Tommy"); 
-    weaponAvailable[1] = new Weapon("Iron", "Iron Tommy", 7, 7, false, 100, 9, 150, 50, #B2A89C, "Tommy");
-    weaponAvailable[2] = new Weapon("Gold", "Gold Tommy", 10, 10, false, 150, 10, 150, 50, #E6ED35, "Tommy");
+    weaponAvailable[0] = new Weapon("Wood", "Wood Tommy", 6, 6, false, 100, 9, 150, 50, #836835, "Tommy"); 
+    weaponAvailable[1] = new Weapon("Iron", "Iron Tommy", 8, 8, false, 100, 9, 150, 50, #B2A89C, "Tommy");
+    weaponAvailable[2] = new Weapon("Gold", "Gold Tommy", 12, 12, false, 150, 10, 150, 50, #E6ED35, "Tommy");
     
     weaponAvailable[3] = new Weapon("Wood", "Wood Shotgun", 75, 150, false, 100, 3, 10, 2, #836835, "Shotgun");
     weaponAvailable[4] = new Weapon("Iron", "Iron Shotgun", 100, 175, false, 100, 3, 10, 2, #B2A89C, "Shotgun");
@@ -718,7 +972,22 @@ class GameBoard {
       
       if( (timesLoopedX*20 == playerXC) & (timesLoopedY*20 == playerYC)) {
         System.out.println("There has been damage dealt from a robot bullet to the player"); 
-        players[0].takeDamage(robotBullets.get(i).getDamage());
+        if(robotBullets.get(i).getStatus()) { players[0].takeDamage(robotBullets.get(i).getDamage()); }
+      }
+      
+      if( (timesLoopedX*20 == playerXC+20) & (timesLoopedY*20 == playerYC)) {
+        System.out.println("There has been damage dealt from a robot bullet to the player"); 
+        if(robotBullets.get(i).getStatus()) { players[0].takeDamage(robotBullets.get(i).getDamage()); }
+      }
+      
+      if( (timesLoopedX*20 == playerXC+20) & (timesLoopedY*20 == playerYC+20)) {
+        System.out.println("There has been damage dealt from a robot bullet to the player"); 
+        if(robotBullets.get(i).getStatus()) { players[0].takeDamage(robotBullets.get(i).getDamage()); }
+      }
+      
+       if( (timesLoopedX*20 == playerXC) & (timesLoopedY*20 == playerYC+20)) {
+        System.out.println("There has been damage dealt from a robot bullet to the player"); 
+        if(robotBullets.get(i).getStatus()) { players[0].takeDamage(robotBullets.get(i).getDamage()); }
       }
       
     }
@@ -766,7 +1035,22 @@ class GameBoard {
       
       if( (timesLoopedX*20 == playerXC) & (timesLoopedY*20 == playerYC)) {
         System.out.println("There has been damage dealt from a flower bullet to the player"); 
-        players[0].takeDamage(flowerBullets.get(i).getDamage());
+        if(flowerBullets.get(i).getStatus()) { players[0].takeDamage(flowerBullets.get(i).getDamage()); }
+      }
+      
+      if( (timesLoopedX*20 == playerXC+20) & (timesLoopedY*20 == playerYC)) {
+        System.out.println("There has been damage dealt from a flower bullet to the player"); 
+        if(flowerBullets.get(i).getStatus()) { players[0].takeDamage(flowerBullets.get(i).getDamage()); }
+      }
+      
+      if( (timesLoopedX*20 == playerXC+20) & (timesLoopedY*20 == playerYC+20)) {
+        System.out.println("There has been damage dealt from a flower bullet to the player"); 
+        if(flowerBullets.get(i).getStatus()) { players[0].takeDamage(flowerBullets.get(i).getDamage()); }
+      }
+      
+      if( (timesLoopedX*20 == playerXC) & (timesLoopedY*20 == playerYC+20)) {
+        System.out.println("There has been damage dealt from a flower bullet to the player"); 
+        if(flowerBullets.get(i).getStatus()) { players[0].takeDamage(flowerBullets.get(i).getDamage()); }
       }
       
     }
@@ -782,20 +1066,20 @@ class GameBoard {
     //System.out.println("Checking collisions"); 
     
     //for each bullet
-    for(int i = 0; i < bulletsInAction; i++) {
+    for(int i = 0; i < playerBullets.size(); i++) {
       
       
       //for each enemy
       for (int e = 0; e < enemies.size(); e++) {
        
         //if the bullet is on the visible screen
-        if(bullets[i].status) {
+        if(playerBullets.get(i).status) {
           //get the necessary variables in order to check collision
           float enemyX = enemies.get(e).xC;    
           float enemyY = enemies.get(e).yC;   
         
-          float bulletX = bullets[i].xCoor; 
-          float bulletY = bullets[i].yCoor;
+          float bulletX = playerBullets.get(i).xCoor; 
+          float bulletY = playerBullets.get(i).yCoor;
           
           //System.out.println("Enemy XC: " + enemyX);
           //System.out.println("Enemy YC: " + enemyY);
@@ -808,16 +1092,18 @@ class GameBoard {
           
           
           //if the origin of the circle (the bullet) + the radius of the circle is within the square that is occupied by an enemy then there has been a collision
-          if(  ( ((enemyX-bulletSize/2) < bulletX) & (bulletX < (enemyX+20+bulletSize/2)) ) & ( ((enemyY-bulletSize/2) < bulletY) & (bulletY < (enemyY+20+bulletSize/2)) ) ) {
+          if(  ( ((enemyX-bulletSize/2) < bulletX) & (bulletX < (enemyX+20+bulletSize/2)) ) & ( ((enemyY-bulletSize/2) < bulletY) & (bulletY < (enemyY+20+bulletSize/2)) ) & (enemies.get(e).getEnemyType() != "Phalax") & (enemies.get(e).getEnemyType() != "ElectroQuad") )  {
             
             //println("There has been a collision");
             collision = true;
             
             //deal the damage
             
+            System.out.println(playerBullets.get(i).getDamage() + " damage dealt to enemy");
+            
             boolean death = false;
             
-            death = enemies.get(e).receiveDamage(bullets[i].getDamage());
+            death = enemies.get(e).receiveDamage(playerBullets.get(i).getDamage());
             
             //if an enemy death has occured, remove it from the game
             if(death) {
@@ -835,21 +1121,240 @@ class GameBoard {
               
             }
             
-          }
-         
-        
-        }
+          } else if (enemies.get(e).getEnemyType() == "Phalax") {
+            
+            boolean phalaxCollision = false; 
+            
+            //first hitbox (left of head)
+            if(   ((enemyX+20-bulletSize/2) < bulletX) & (bulletX < (enemyX+40+bulletSize/2)) & ( ((enemyY-bulletSize/2) < bulletY) & (bulletY < (enemyY+20+bulletSize/2)) ) ) { phalaxCollision = true; }
+              
+            //second hitbox (right of head)
+            if(   ((enemyX+40-bulletSize/2) < bulletX) & (bulletX < (enemyX+60+bulletSize/2)) & ( ((enemyY-bulletSize/2) < bulletY) & (bulletY < (enemyY+20+bulletSize/2)) ) ) { phalaxCollision = true; }
+            
+           
+           
+           
+            //third hitbox (left of chin and neck)
+            if(   ((enemyX+20-bulletSize/2) < bulletX) & (bulletX < (enemyX+40+bulletSize/2)) & ( ((enemyY+20-bulletSize/2) < bulletY) & (bulletY < (enemyY+40+bulletSize/2)) ) ) { phalaxCollision = true; }
+            
+            //fourth hitbox (right of chin and neck)
+            if(   ((enemyX+40-bulletSize/2) < bulletX) & (bulletX < (enemyX+60+bulletSize/2)) & ( ((enemyY+20-bulletSize/2) < bulletY) & (bulletY < (enemyY+40+bulletSize/2)) ) ) { phalaxCollision = true; }
+            
+            
+            
+            
+            
+            //fifth hitbox (left arm)
+            if(   ((enemyX-bulletSize/2) < bulletX) & (bulletX < (enemyX+20+bulletSize/2)) & ( ((enemyY+40-bulletSize/2) < bulletY) & (bulletY < (enemyY+60+bulletSize/2)) ) ) { phalaxCollision = true; }
+            
+            //sixth hitbox (left shoulder)
+            if(   ((enemyX+20-bulletSize/2) < bulletX) & (bulletX < (enemyX+40+bulletSize/2)) & ( ((enemyY+40-bulletSize/2) < bulletY) & (bulletY < (enemyY+60+bulletSize/2)) ) ) { phalaxCollision = true; }
+            
+            //seventh hitbox (right shoulder)
+            if(   ((enemyX+40-bulletSize/2) < bulletX) & (bulletX < (enemyX+60+bulletSize/2)) & ( ((enemyY+40-bulletSize/2) < bulletY) & (bulletY < (enemyY+60+bulletSize/2)) ) ) { phalaxCollision = true; }
+            
+            //eighth hitbox (right arm)
+            if(   ((enemyX+60-bulletSize/2) < bulletX) & (bulletX < (enemyX+80+bulletSize/2)) & ( ((enemyY+40-bulletSize/2) < bulletY) & (bulletY < (enemyY+60+bulletSize/2)) ) ) { phalaxCollision = true; }
+            
+            
+            
+            
+            //ninth hitbox (left knee and thigh)
+            if(   ((enemyX+20-bulletSize/2) < bulletX) & (bulletX < (enemyX+40+bulletSize/2)) & ( ((enemyY+60-bulletSize/2) < bulletY) & (bulletY < (enemyY+80+bulletSize/2)) ) ) { phalaxCollision = true; }
+            
+            //tenth hitbox (right knee and thigh)
+            if(   ((enemyX+40-bulletSize/2) < bulletX) & (bulletX < (enemyX+60+bulletSize/2)) & ( ((enemyY+60-bulletSize/2) < bulletY) & (bulletY < (enemyY+80+bulletSize/2)) ) ) { phalaxCollision = true; }
+            
+            
+            
+            
+            
+            //eleventh hitbox (left chin and foot)
+            if(   ((enemyX+20-bulletSize/2) < bulletX) & (bulletX < (enemyX+40+bulletSize/2)) & ( ((enemyY+80-bulletSize/2) < bulletY) & (bulletY < (enemyY+100+bulletSize/2)) ) ) { phalaxCollision = true; }
+            
+            //twelvth hitbox (right chin and foot)
+            if(   ((enemyX+40-bulletSize/2) < bulletX) & (bulletX < (enemyX+60+bulletSize/2)) & ( ((enemyY+80-bulletSize/2) < bulletY) & (bulletY < (enemyY+100+bulletSize/2)) ) ) { phalaxCollision = true; }
+
+              
+            
+            if(phalaxCollision) {
+              
+               System.out.println("PHALAX COLLISION");
+              
+               boolean death = false;
+            
+               death = enemies.get(e).receiveDamage(playerBullets.get(i).getDamage());
+            
+              //if an enemy death has occured, remove it from the game
+              if(death) {
+                System.out.println("There has been a MURDER");
+              
+                //get the appropriate score to add
+                int addedScore = enemies.get(e).getScore();
+                score = score + addedScore; 
           
-        
+                //set the players score
+                players[0].setScore(score);
+              
+                //remove the enemy from the game
+                enemies.remove(enemies.get(e));
+                
+                this.generateBiome();
+              
+              
+              }
+          
+            
+            }
+          
+         } else if (enemies.get(e).getEnemyType() == "ElectroQuad" || enemies.get(e).getEnemyType() == "ElectroDuo") {
+           
+           boolean electroQuadCollision = false;
+           
+           //first hitbox (left of head)
+            if(   ((enemyX+20-bulletSize/2) < bulletX) & (bulletX < (enemyX+40+bulletSize/2)) & ( ((enemyY-bulletSize/2) < bulletY) & (bulletY < (enemyY+20+bulletSize/2)) ) ) { electroQuadCollision = true; }
+              
+            //second hitbox (right of head)
+            if(   ((enemyX+40-bulletSize/2) < bulletX) & (bulletX < (enemyX+60+bulletSize/2)) & ( ((enemyY-bulletSize/2) < bulletY) & (bulletY < (enemyY+20+bulletSize/2)) ) ) { electroQuadCollision = true; }
+            
+           
+           
+           
+            //third hitbox (left of body)
+            if(   ((enemyX+20-bulletSize/2) < bulletX) & (bulletX < (enemyX+40+bulletSize/2)) & ( ((enemyY+20-bulletSize/2) < bulletY) & (bulletY < (enemyY+40+bulletSize/2)) ) ) { electroQuadCollision = true; }
+            
+            //fourth hitbox (right of body)
+            if(   ((enemyX+40-bulletSize/2) < bulletX) & (bulletX < (enemyX+60+bulletSize/2)) & ( ((enemyY+20-bulletSize/2) < bulletY) & (bulletY < (enemyY+40+bulletSize/2)) ) ) { electroQuadCollision = true; }
+            
+            
+            if(electroQuadCollision & enemies.get(e).getEnemyType().equals("ElectroQuad")) {
+             
+              
+               System.out.println("ELECTRO QUAD COLLISION");
+              
+               boolean death = false;
+            
+               death = enemies.get(e).receiveDamage(playerBullets.get(i).getDamage());
+            
+              //if an enemy death has occured, remove it from the game
+              if(death) {
+                System.out.println("There has been a MURDER");
+              
+                //get the appropriate score to add
+                int addedScore = enemies.get(e).getScore();
+                score = score + addedScore; 
+          
+                //set the players score
+                players[0].setScore(score);
+                
+                //spawn two electro duo's near where this electro quad died
+                electroQuadDeath(enemyX, enemyY);
+              
+                //remove the enemy from the game
+                enemies.remove(enemies.get(e));
+                
+                
+                
+              
+              
+              }
+          
+            
+            } else if (electroQuadCollision & enemies.get(e).getEnemyType().equals("ElectroDuo")) {
+              
+              System.out.println("ELECTRO DUO COLLISION");
+              
+               boolean death = false;
+            
+               death = enemies.get(e).receiveDamage(playerBullets.get(i).getDamage());
+            
+              //if an enemy death has occured, remove it from the game
+              if(death) {
+                System.out.println("There has been a MURDER");
+              
+                //get the appropriate score to add
+                int addedScore = enemies.get(e).getScore();
+                score = score + addedScore; 
+          
+                //set the players score
+                players[0].setScore(score);
+                
+                //spawn two electro duo's near where this electro quad died
+                electroDuoDeath(enemyX, enemyY);
+              
+                //remove the enemy from the game
+                enemies.remove(enemies.get(e));
+                
+              }
+              
+              
+            }
+           
+           
+           
+         }
       }
       
+     }
     }
     
     
   }
   
+  void electroDuoDeath(float deathX, float deathY) {
+    
+    //TODO: make sure not outside of gameboard
+      ElectroMan tempMan1 = new ElectroMan(deathX, deathY+40);
+      
+      ElectroMan tempMan2 = new ElectroMan(deathX, deathY-40);
+      
+      ElectroMan tempMan3 = new ElectroMan(deathX+40, deathY);
+      
+      ElectroMan tempMan4 = new ElectroMan(deathX-40, deathY);
+      
+      
+      enemies.add(tempMan1);
+      enemies.add(tempMan2);
+      enemies.add(tempMan3);
+      enemies.add(tempMan4);
+      
+    
+  }
   
-  void introduceRobotBullet(int shootingAtX, int shootingAtY, int robotX, int robotY, int damage) {
+  void electroQuadDeath(float deathX, float deathY) {
+    
+    //TODO: make sure not outside of gameboard
+      ElectroDuo tempDuo1 = new ElectroDuo(deathX, deathY+40);
+      
+      ElectroDuo tempDuo2 = new ElectroDuo(deathX, deathY-40);
+      
+     
+      enemies.add(tempDuo1);
+      enemies.add(tempDuo2);
+      
+    
+  }
+  
+  
+  void introducePhalaxBullet(int shootingAtX, int shootingAtY, int phalaxX, int phalaxY, int damage) {
+    
+    System.out.println("Phalax Shooting"); 
+   
+    introduceFlowerBullet(shootingAtX, shootingAtY, phalaxX, phalaxY, damage, false); 
+    introduceFlowerBullet(shootingAtX+20, shootingAtY+20, phalaxX+20, phalaxY+20, damage, false);
+    introduceFlowerBullet(shootingAtX+40, shootingAtY+40, phalaxX+40, phalaxY+40, damage, false);
+    introduceFlowerBullet(shootingAtX+60, shootingAtY+60, phalaxX+60, phalaxY+60, damage, false);
+    introduceFlowerBullet(shootingAtX+80, shootingAtY+80, phalaxX+80, phalaxY+80, damage, false);
+    
+    introduceRobotBullet(shootingAtX, shootingAtY, phalaxX, phalaxY, damage, false); 
+    introduceRobotBullet(shootingAtX+20, shootingAtY+20, phalaxX+20, phalaxY+20, damage, false);
+    introduceRobotBullet(shootingAtX+40, shootingAtY+40, phalaxX+40, phalaxY+40, damage, false);
+    introduceRobotBullet(shootingAtX+60, shootingAtY+60, phalaxX+60, phalaxY+60, damage, false);
+    introduceRobotBullet(shootingAtX+80, shootingAtY+80, phalaxX+80, phalaxY+80, damage, false);
+    
+  }
+  
+  void introduceRobotBullet(int shootingAtX, int shootingAtY, int robotX, int robotY, int damage, boolean electroQuad) {
     
     System.out.println("ROBOT SHOOTING");
     
@@ -888,7 +1393,7 @@ class GameBoard {
          //calculating the angle of the bullet
          theta = asin(  (a/hypotenuse) );
          
-         println("Theta: " + theta); 
+         //println("Theta: " + theta); 
          
          //These next lines essentially calculate the appropriate X and Y components
          //of the bullet, in order to generate the appropriate X and Y speeds,
@@ -896,7 +1401,7 @@ class GameBoard {
          
          ratio = theta / 1.570796326;  //pi/2 
          
-         println("Ratio: " + ratio); 
+        // println("Ratio: " + ratio); 
          ratio = ratio*100;
          
          yPercentage = ratio; 
@@ -908,14 +1413,14 @@ class GameBoard {
          //get negative Y speed for this case
          ySpeed = ySpeed - ySpeed*2; 
          
-         System.out.println("X speed of bullet: " + xSpeed); 
-         System.out.println("Y speed of bullet: " + ySpeed); 
+        // System.out.println("X speed of bullet: " + xSpeed); 
+       //  System.out.println("Y speed of bullet: " + ySpeed); 
          
-         tempRobotBullet = new RobotBullet(xSpeed, ySpeed, 10, robotX, robotY, (int)damage/2); 
+         tempRobotBullet = new RobotBullet(xSpeed*2, ySpeed*2, 10, robotX, robotY, (int)damage/2); 
       
       } else if (robotX > shootingAtX) { //the robot is shooting to the left and up
-         println("the robot is shooting to the left and up");
-         
+        // println("the robot is shooting to the left and up");
+       //  
          
          b = robotX - shootingAtX; 
          a = robotY - shootingAtY; 
@@ -924,7 +1429,7 @@ class GameBoard {
          
          theta = asin(  (a/hypotenuse) );
          
-         println("Theta: " + theta);
+        // println("Theta: " + theta);
          
          
          //These next lines essentially calculate the appropriate X and Y components
@@ -933,7 +1438,7 @@ class GameBoard {
          
          ratio = theta / 1.570796326;  //pi/2 
          
-         println("Ratio: " + ratio); 
+        // println("Ratio: " + ratio); 
          ratio = ratio*100;
          
          yPercentage = ratio; 
@@ -948,17 +1453,17 @@ class GameBoard {
          //get negative X speed for this case
          xSpeed = xSpeed - xSpeed*2; 
          
-         System.out.println("X speed of bullet: " + xSpeed); 
-         System.out.println("Y speed of bullet: " + ySpeed); 
+        // System.out.println("X speed of bullet: " + xSpeed); 
+         //System.out.println("Y speed of bullet: " + ySpeed); 
          
-         tempRobotBullet = new RobotBullet(xSpeed, ySpeed, 10, robotX, robotY, (int)damage/2); 
+         tempRobotBullet = new RobotBullet(xSpeed*2, ySpeed*2, 10, robotX, robotY, (int)damage/2); 
       
       }
       
     } else if (robotY < shootingAtY) { //the player is shooting down
    
         if(robotX <= shootingAtX) { //the player is shooting to the right and down
-           println("the player is shooting to the right and down");
+         //  println("the player is shooting to the right and down");
            
            a = shootingAtY - robotY; 
            b = shootingAtX - robotX;
@@ -967,7 +1472,7 @@ class GameBoard {
          
            theta = asin(  (a/hypotenuse) );
          
-           println("Theta: " + theta);
+         //  println("Theta: " + theta);
            
            
            //These next lines essentially calculate the appropriate X and Y components
@@ -976,7 +1481,7 @@ class GameBoard {
          
            ratio = theta / 1.570796326;  //pi/2 
          
-           println("Ratio: " + ratio); 
+        //   println("Ratio: " + ratio); 
            ratio = ratio*100;
          
            yPercentage = ratio; 
@@ -985,14 +1490,14 @@ class GameBoard {
            ySpeed = yPercentage/10; 
            xSpeed = xPercentage/10;
          
-           System.out.println("X speed of bullet: " + xSpeed); 
-           System.out.println("Y speed of bullet: " + ySpeed); 
+         //  System.out.println("X speed of bullet: " + xSpeed); 
+         //  System.out.println("Y speed of bullet: " + ySpeed); 
            
-           tempRobotBullet = new RobotBullet(xSpeed, ySpeed, 10, robotX, robotY, (int)damage/2); 
+           tempRobotBullet = new RobotBullet(xSpeed*2, ySpeed*2, 10, robotX, robotY, (int)damage/2); 
            
         } else if (robotX > shootingAtX) { //the robot is shooting to the left and down
-           println("the robot is shooting to the left and down");
-           
+         //  println("the robot is shooting to the left and down");
+         //  
            
            b = robotX - shootingAtX; 
            a = shootingAtY - robotY;
@@ -1001,7 +1506,7 @@ class GameBoard {
          
            theta = asin(  (a/hypotenuse) );
          
-           println("Theta: " + theta);        
+         //  println("Theta: " + theta);        
            
            //These next lines essentially calculate the appropriate X and Y components
            //of the bullet, in order to generate the appropriate X and Y speeds,
@@ -1009,7 +1514,7 @@ class GameBoard {
          
            ratio = theta / 1.570796326;  //pi/2 
          
-           println("Ratio: " + ratio); 
+         //  println("Ratio: " + ratio); 
            ratio = ratio*100;
          
            yPercentage = ratio; 
@@ -1021,23 +1526,28 @@ class GameBoard {
            //negative X speed for this case
            xSpeed = xSpeed - xSpeed*2; 
          
-           System.out.println("X speed of bullet: " + xSpeed); 
-           System.out.println("Y speed of bullet: " + ySpeed); 
+          // System.out.println("X speed of bullet: " + xSpeed); 
+          // System.out.println("Y speed of bullet: " + ySpeed); 
            
-           tempRobotBullet = new RobotBullet(xSpeed, ySpeed, 10, robotX, robotY, (int)damage/2); 
+           tempRobotBullet = new RobotBullet(xSpeed*2, ySpeed*2, 10, robotX, robotY, (int)damage/2); 
         }
         
     }
     
-    robotBullets.add(tempRobotBullet = new RobotBullet(xSpeed, ySpeed, 10, robotX, robotY, (int)damage/2)); 
+    robotBullets.add(tempRobotBullet = new RobotBullet(xSpeed*2, ySpeed*2, 10, robotX, robotY, (int)damage/2)); 
     
+    if(electroQuad) { 
+      
+      robotBullets.add(new RobotBullet(xSpeed*2, ySpeed*2, 10, robotX+20, robotY, (int)damage/2));
+      robotBullets.add(new RobotBullet(xSpeed*2, ySpeed*2, 10, robotX+40, robotY, (int)damage/2));
+    }
   }
     
   
-  void introduceFlowerBullet(int shootingAtX, int shootingAtY, int flowerX, int flowerY, int damage) {
+  void introduceFlowerBullet(int shootingAtX, int shootingAtY, int flowerX, int flowerY, int damage, boolean electroDuo) {
     
-    println("Shooting from (" + flowerX + "," + flowerY + ")");
-    println("Shooting at (" + shootingAtX + "," + shootingAtY + ")");
+   // println("Shooting from (" + flowerX + "," + flowerY + ")");
+   // println("Shooting at (" + shootingAtX + "," + shootingAtY + ")");
     
     FlowerBullet tempFlowerBullet; 
     
@@ -1048,14 +1558,22 @@ class GameBoard {
        if(flowerY < shootingAtY) {
          
          //no xSpeed
-         tempFlowerBullet = new FlowerBullet(0,15,10,flowerX,flowerY, damage);
+         if(electroDuo) {
+           tempFlowerBullet = new FlowerBullet(0,15,20,flowerX,flowerY, damage);
+         } else {
+           tempFlowerBullet = new FlowerBullet(0,15,10,flowerX,flowerY, damage);
+         }
          
       
       //flower is directly shooting updwards
        } else {
          
          //no xSpeed.
-         tempFlowerBullet = new FlowerBullet(0,-15,10,flowerX,flowerY, damage);
+         if(electroDuo) {
+           tempFlowerBullet = new FlowerBullet(0,-30,20,flowerX,flowerY, damage);
+         } else {
+           tempFlowerBullet = new FlowerBullet(0,-30,10,flowerX,flowerY, damage);
+         }
          
        }
       
@@ -1069,7 +1587,11 @@ class GameBoard {
       if (flowerX > shootingAtX) {
         
         //no ySpeed
-        tempFlowerBullet = new FlowerBullet(-15,0,10,flowerX,flowerY, damage);
+        if(electroDuo) {
+          tempFlowerBullet = new FlowerBullet(-30,0,20,flowerX,flowerY, damage);
+        } else {
+          tempFlowerBullet = new FlowerBullet(-30,0,10,flowerX,flowerY, damage);
+        }
         
         
         
@@ -1077,7 +1599,11 @@ class GameBoard {
       } else {
         
         //no ySpeed
-        tempFlowerBullet = new FlowerBullet(15,0,10,flowerX,flowerY, damage);
+        if(electroDuo) {
+          tempFlowerBullet = new FlowerBullet(30,0,20,flowerX,flowerY, damage);
+        } else {
+          tempFlowerBullet = new FlowerBullet(30,0,10,flowerX,flowerY, damage);
+        }
         
         
       }
@@ -1091,12 +1617,71 @@ class GameBoard {
   
         
   }
-    
   
-  void introduceBullet(int shootingAtX, int shootingAtY, int playerX, int playerY, Weapon weaponUsed, Boolean shotgunBullet) {
+  void superPowerApplied() {
     
-    println("Shooting from (" + playerX + "," + playerY + ")");
-    println("Shooting at (" + shootingAtX + "," + shootingAtY + ")");
+    System.out.println("Power being applied to the board"); 
+    
+    //flipped them somewhere along the line
+    int originXC = players[0].getYC();
+    int originYC = players[0].getXC();
+    
+    introduceBullet(originXC+10, originYC, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC+1, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC+2, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC+3, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC+4, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC+5, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC+6, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC+7, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC+8, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC+9, originXC, originYC, weaponAvailable[6], false, true);
+    
+    
+    introduceBullet(originXC+10, originYC, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC-1, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC-2, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC-3, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC-4, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC-5, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC-6, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC-7, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC-8, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC+10, originYC-9, originXC, originYC, weaponAvailable[6], false, true);
+    
+    
+    introduceBullet(originXC-10, originYC, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC+1, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC+2, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC+3, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC+4, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC+5, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC+6, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC+7, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC+8, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC+9, originXC, originYC, weaponAvailable[6], false, true);
+    
+    
+    introduceBullet(originXC-10, originYC, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC-1, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC-2, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC-3, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC-4, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC-5, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC-6, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC-7, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC-8, originXC, originYC, weaponAvailable[6], false, true);
+    introduceBullet(originXC-10, originYC-9, originXC, originYC, weaponAvailable[6], false, true);
+   // players[0].getTommy().addAmmo(30);
+    
+   
+  }
+  
+  
+  void introduceBullet(int shootingAtX, int shootingAtY, int playerX, int playerY, Weapon weaponUsed, Boolean shotgunBullet, Boolean superPowerBullet) {
+    
+   // println("Shooting from (" + playerX + "," + playerY + ")");
+   // println("Shooting at (" + shootingAtX + "," + shootingAtY + ")");
     
     
     float a = 0; 
@@ -1111,14 +1696,18 @@ class GameBoard {
     float xSpeed; 
     float ySpeed; 
     
+    weaponUsed.useAmmo(1);
+    
+    
+    //System.out.println("Max damage of weapon used: " + weaponUsed.getMaxDamage());
     
     if (playerY >= shootingAtY & (!shotgunBullet)) {   //the player is shooting upwards or horizontally
     
     
       
       
-      if(playerX <= shootingAtX & (players[0].activeTommy.ammo >= 1)) { //the player is shooting to the right and up
-         println("the player is shooting to the right and up");
+      if(playerX <= shootingAtX & ((players[0].activeTommy.ammo >= 1)||superPowerBullet)) { //the player is shooting to the right and up
+       //  println("the player is shooting to the right and up");
          
          //calculating lengths of sides of the right angle triangle
          b = shootingAtX - playerX; 
@@ -1130,7 +1719,7 @@ class GameBoard {
          //calculating the angle of the bullet
          theta = asin(  (a/hypotenuse) );
          
-         println("Theta: " + theta); 
+         //println("Theta: " + theta); 
          
          //These next lines essentially calculate the appropriate X and Y components
          //of the bullet, in order to generate the appropriate X and Y speeds,
@@ -1138,7 +1727,7 @@ class GameBoard {
          
          ratio = theta / 1.570796326;  //pi/2 
          
-         println("Ratio: " + ratio); 
+       //  println("Ratio: " + ratio); 
          ratio = ratio*100;
          
          yPercentage = ratio; 
@@ -1150,20 +1739,26 @@ class GameBoard {
          //get negative Y speed for this case
          ySpeed = ySpeed - ySpeed*2; 
          
-         System.out.println("X speed of bullet: " + xSpeed); 
-         System.out.println("Y speed of bullet: " + ySpeed); 
+       //  System.out.println("X speed of bullet: " + xSpeed); 
+       //  System.out.println("Y speed of bullet: " + ySpeed); 
          
-         players[0].activeTommy.useAmmo(1);
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+         if(!superPowerBullet) { players[0].activeTommy.useAmmo(1); }
          
-         bullets[bulletsInAction].setDamage(weaponUsed.getMaxDamage());
-         bullets[bulletsInAction].setShotFrom(weaponUsed.getName());
-         bulletsInAction++;
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20); 
+        // bullets[bulletsInAction].setLocY(playerY*20);
+        // bullets[bulletsInAction].status = true;
+         
+        // bullets[bulletsInAction].setDamage(weaponUsed.getMaxDamage());
+        // bullets[bulletsInAction].setShotFrom(weaponUsed.getName());
+        // bulletsInAction++;
+         
+         
+         Bullet tempBullet = new Bullet(xSpeed*3, ySpeed*3, playerX*20, playerY*20, true, weaponUsed.getMaxDamage(), weaponUsed.getName());
+         
+         playerBullets.add(tempBullet); 
          
          if(players[0].activeTommy.ammo <= 0) {
       
@@ -1174,8 +1769,8 @@ class GameBoard {
          
          
       
-      } else if (playerX > shootingAtX & (players[0].activeTommy.ammo >= 1)) { //the player is shooting to the left and up
-         println("the player is shooting to the left and up");
+      } else if (playerX > shootingAtX & ((players[0].activeTommy.ammo >= 1)||superPowerBullet)) { //the player is shooting to the left and up
+       //  println("the player is shooting to the left and up");
          
          
          b = playerX - shootingAtX; 
@@ -1185,7 +1780,7 @@ class GameBoard {
          
          theta = asin(  (a/hypotenuse) );
          
-         println("Theta: " + theta);
+        // println("Theta: " + theta);
          
          
          //These next lines essentially calculate the appropriate X and Y components
@@ -1194,7 +1789,7 @@ class GameBoard {
          
          ratio = theta / 1.570796326;  //pi/2 
          
-         println("Ratio: " + ratio); 
+        // println("Ratio: " + ratio); 
          ratio = ratio*100;
          
          yPercentage = ratio; 
@@ -1209,20 +1804,26 @@ class GameBoard {
          //get negative X speed for this case
          xSpeed = xSpeed - xSpeed*2; 
          
-         System.out.println("X speed of bullet: " + xSpeed); 
-         System.out.println("Y speed of bullet: " + ySpeed); 
+        // System.out.println("X speed of bullet: " + xSpeed); 
+       //  System.out.println("Y speed of bullet: " + ySpeed); 
          
-         players[0].activeTommy.useAmmo(1);
+        if(!superPowerBullet) { players[0].activeTommy.useAmmo(1); }
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
          
-         bullets[bulletsInAction].setDamage(weaponUsed.getMaxDamage());
-         bullets[bulletsInAction].setShotFrom(weaponUsed.getName());
+        // bullets[bulletsInAction].setDamage(weaponUsed.getMaxDamage());
+        // bullets[bulletsInAction].setShotFrom(weaponUsed.getName());
          
-         bulletsInAction++;
+        // bulletsInAction++;
+         
+         
+         Bullet tempBullet = new Bullet(xSpeed*3, ySpeed*3, playerX*20, playerY*20, true, weaponUsed.getMaxDamage(), weaponUsed.getName());
+         
+         playerBullets.add(tempBullet); 
+         
          
          if(players[0].activeTommy.ammo <= 0) {
       
@@ -1233,10 +1834,10 @@ class GameBoard {
       
       }
       
-    } else if (playerY < shootingAtY & (!shotgunBullet) & (players[0].activeTommy.ammo >= 1)) { //the player is shooting down
+    } else if (playerY < shootingAtY & (!shotgunBullet) & ((players[0].activeTommy.ammo >= 1)||superPowerBullet)) { //the player is shooting down
    
         if(playerX <= shootingAtX) { //the player is shooting to the right and down
-           println("the player is shooting to the right and down");
+          // println("the player is shooting to the right and down");
            
            a = shootingAtY - playerY; 
            b = shootingAtX - playerX;
@@ -1245,7 +1846,7 @@ class GameBoard {
          
            theta = asin(  (a/hypotenuse) );
          
-           println("Theta: " + theta);
+          // println("Theta: " + theta);
            
            
            //These next lines essentially calculate the appropriate X and Y components
@@ -1254,7 +1855,7 @@ class GameBoard {
          
            ratio = theta / 1.570796326;  //pi/2 
          
-           println("Ratio: " + ratio); 
+        //   println("Ratio: " + ratio); 
            ratio = ratio*100;
          
            yPercentage = ratio; 
@@ -1263,20 +1864,25 @@ class GameBoard {
            ySpeed = yPercentage/10; 
            xSpeed = xPercentage/10;
          
-           System.out.println("X speed of bullet: " + xSpeed); 
-           System.out.println("Y speed of bullet: " + ySpeed); 
+         //  System.out.println("X speed of bullet: " + xSpeed); 
+         //  System.out.println("Y speed of bullet: " + ySpeed); 
            
-           players[0].activeTommy.useAmmo(1);
+        if(!superPowerBullet) { players[0].activeTommy.useAmmo(1); }
            
-           bullets[bulletsInAction].setSpeedX(xSpeed); 
-           bullets[bulletsInAction].setSpeedY(ySpeed);
-           bullets[bulletsInAction].setLocX(playerX*20); 
-           bullets[bulletsInAction].setLocY(playerY*20);
+        //   bullets[bulletsInAction].setSpeedX(xSpeed); 
+         //  bullets[bulletsInAction].setSpeedY(ySpeed);
+         //  bullets[bulletsInAction].setLocX(playerX*20); 
+         //  bullets[bulletsInAction].setLocY(playerY*20);
            
-           bullets[bulletsInAction].setDamage(weaponUsed.getMaxDamage());
-           bullets[bulletsInAction].setShotFrom(weaponUsed.getName());
+         //  bullets[bulletsInAction].setDamage(weaponUsed.getMaxDamage());
+         //  bullets[bulletsInAction].setShotFrom(weaponUsed.getName());
+        // 
+        //   bulletsInAction++;
+        
+       Bullet tempBullet = new Bullet(xSpeed*3, ySpeed*3, playerX*20, playerY*20, true, weaponUsed.getMaxDamage(), weaponUsed.getName());
          
-           bulletsInAction++;
+         playerBullets.add(tempBullet); 
+         
            
            if(players[0].activeTommy.ammo <= 0) {
       
@@ -1285,8 +1891,8 @@ class GameBoard {
          }
            
       
-        } else if (playerX > shootingAtX & (players[0].activeTommy.ammo >= 1)) { //the player is shooting to the left and down
-           println("the player is shooting to the left and down");
+        } else if (playerX > shootingAtX & ((players[0].activeTommy.ammo >= 1)||superPowerBullet)) { //the player is shooting to the left and down
+          // println("the player is shooting to the left and down");
            
            
            b = playerX - shootingAtX; 
@@ -1296,7 +1902,7 @@ class GameBoard {
          
            theta = asin(  (a/hypotenuse) );
          
-           println("Theta: " + theta);        
+         //  println("Theta: " + theta);        
            
            //These next lines essentially calculate the appropriate X and Y components
            //of the bullet, in order to generate the appropriate X and Y speeds,
@@ -1304,7 +1910,7 @@ class GameBoard {
          
            ratio = theta / 1.570796326;  //pi/2 
          
-           println("Ratio: " + ratio); 
+          // println("Ratio: " + ratio); 
            ratio = ratio*100;
          
            yPercentage = ratio; 
@@ -1316,20 +1922,25 @@ class GameBoard {
            //negative X speed for this case
            xSpeed = xSpeed - xSpeed*2; 
          
-           System.out.println("X speed of bullet: " + xSpeed); 
-           System.out.println("Y speed of bullet: " + ySpeed); 
+          // System.out.println("X speed of bullet: " + xSpeed); 
+          // System.out.println("Y speed of bullet: " + ySpeed); 
            
-           players[0].activeTommy.useAmmo(1);
+          if(!superPowerBullet) { players[0].activeTommy.useAmmo(1); }
            
-           bullets[bulletsInAction].setSpeedX(xSpeed); 
-           bullets[bulletsInAction].setSpeedY(ySpeed);
-           bullets[bulletsInAction].setLocX(playerX*20); 
-           bullets[bulletsInAction].setLocY(playerY*20);
+         //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+          // bullets[bulletsInAction].setSpeedY(ySpeed);
+         //  bullets[bulletsInAction].setLocX(playerX*20); 
+         //  bullets[bulletsInAction].setLocY(playerY*20);
            
-           bullets[bulletsInAction].setDamage(weaponUsed.getMaxDamage());
-           bullets[bulletsInAction].setShotFrom(weaponUsed.getName());
+         //  bullets[bulletsInAction].setDamage(weaponUsed.getMaxDamage());
+        //   bullets[bulletsInAction].setShotFrom(weaponUsed.getName());
+        // 
+         //  bulletsInAction++;
          
-           bulletsInAction++;
+         Bullet tempBullet = new Bullet(xSpeed*3, ySpeed*3, playerX*20, playerY*20, true, weaponUsed.getMaxDamage(), weaponUsed.getName());
+         
+         playerBullets.add(tempBullet); 
+         
            
            if(players[0].activeTommy.ammo <= 0) {
       
@@ -1350,7 +1961,7 @@ class GameBoard {
       
       
       if(playerX <= shootingAtX) { //the player is shooting to the right and up
-         println("the player is shooting to the right and up");
+       //  println("the player is shooting to the right and up");
          
          players[0].activeShotgun.useAmmo(1);
          
@@ -1365,7 +1976,7 @@ class GameBoard {
          //calculating the angle of the bullet
          theta = asin(  (a/hypotenuse) );
          
-         System.out.println("Theta: " + theta); 
+        // System.out.println("Theta: " + theta); 
          
          //These next lines essentially calculate the appropriate X and Y components
          //of the bullet, in order to generate the appropriate X and Y speeds,
@@ -1373,7 +1984,7 @@ class GameBoard {
          
          ratio = theta / 1.570796326;  //pi/2 
          
-         println("Ratio: " + ratio); 
+       //  println("Ratio: " + ratio); 
          ratio = ratio*100;
          
          yPercentage = ratio; 
@@ -1385,119 +1996,204 @@ class GameBoard {
          //get negative Y speed for this case
          ySpeed = ySpeed - ySpeed*2; 
          
-         System.out.println("X speed of bullet: " + xSpeed); 
-         System.out.println("Y speed of bullet: " + ySpeed); 
+        // System.out.println("X speed of bullet: " + xSpeed); 
+       //  System.out.println("Y speed of bullet: " + ySpeed); 
          
          if ( (theta < 0.39) ) {
            
-           bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+          // bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20); 
+        // bullets[bulletsInAction].setLocY(playerY*20);
+        // bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
-         
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20+10);
-         bullets[bulletsInAction].status = true;
-         
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
-         
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20+20);
-         bullets[bulletsInAction].status = true;
-         
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+        // bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+        // bulletsInAction++;
          
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20-10);
-         bullets[bulletsInAction].status = true;
+         Bullet tempBullet = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         playerBullets.add(tempBullet); 
          
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20-20);
-         bullets[bulletsInAction].status = true;
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20+10);
+       //  bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+        // bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+        // bullets[bulletsInAction].setShotFrom("Shotgun");
+        // bulletsInAction++;
+         
+          Bullet tempBullet2 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20+10, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet2); 
+         
+       //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+      //   bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20+20);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+          
+          Bullet tempBullet3 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20+20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet3); 
+         
+         
+      //   bullets[bulletsInAction].setSpeedX(xSpeed); 
+     //    bullets[bulletsInAction].setSpeedY(ySpeed);
+      //   bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20-10);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+         
+          Bullet tempBullet4 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20-10, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet4); 
+         
+         
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20-20);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+         
+          Bullet tempBullet5 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20-20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet5); 
+         
+         
+         //extra
+          Bullet tempBullet6 = new Bullet(xSpeed*2, ySpeed*2, playerX*20-10, playerY*20-10, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet6); 
+         
+         Bullet tempBullet7 = new Bullet(xSpeed*2, ySpeed*2, playerX*20-10, playerY*20+10, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet7); 
+         
+         Bullet tempBullet8 = new Bullet(xSpeed*2, ySpeed*2, playerX*20-10, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet8); 
+         
            
          shotGunSickness = true;
            
          
          } else { 
            
-           bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+         //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20); 
+        // bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
-         
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20+10); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
-         
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
-         
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20+20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
-         
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+        // bullets[bulletsInAction].setShotFrom("Shotgun");
+         //bulletsInAction++;
          
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20-10); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+          Bullet tempBullet = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         playerBullets.add(tempBullet); 
          
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20-20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20+10); 
+        // bullets[bulletsInAction].setLocY(playerY*20);
+        // bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+         
+          Bullet tempBullet2 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20+10, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet2); 
+         
+         
+         
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20+20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+         
+         
+          Bullet tempBullet3 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20+20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet3); 
+         
+         
+       //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20-10); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
+         
+      //   bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+      //   bullets[bulletsInAction].setShotFrom("Shotgun");
+      //   bulletsInAction++;
+         
+         
+          Bullet tempBullet4 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20-10, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet4); 
+         
+         
+       //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20-20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+      //   bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+         
+            Bullet tempBullet5 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20-20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet5); 
+         
+         
+         
+         //extra
+          Bullet tempBullet6 = new Bullet(xSpeed*2, ySpeed*2, playerX*20-10, playerY*20-10, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet6); 
+         
+         Bullet tempBullet7 = new Bullet(xSpeed*2, ySpeed*2, playerX*20-10, playerY*20+10, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet7); 
+         
+         Bullet tempBullet8 = new Bullet(xSpeed*2, ySpeed*2, playerX*20-10, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet8); 
+         
          
          shotGunSickness = true;
            
@@ -1507,7 +2203,7 @@ class GameBoard {
            
              
       } else if (playerX > shootingAtX) { //the player is shooting to the left and up
-         println("the player is shooting to the left and up");
+        // println("the player is shooting to the left and up");
          
           players[0].activeShotgun.useAmmo(1);
          
@@ -1518,7 +2214,7 @@ class GameBoard {
          
          theta = asin(  (a/hypotenuse) );
          
-         System.out.println("Theta: " + theta);
+        // System.out.println("Theta: " + theta);
          
          
          //These next lines essentially calculate the appropriate X and Y components
@@ -1527,7 +2223,7 @@ class GameBoard {
          
          ratio = theta / 1.570796326;  //pi/2 
          
-         println("Ratio: " + ratio); 
+      //   println("Ratio: " + ratio); 
          ratio = ratio*100;
          
          yPercentage = ratio; 
@@ -1542,122 +2238,175 @@ class GameBoard {
          //get negative X speed for this case
          xSpeed = xSpeed - xSpeed*2; 
          
-         System.out.println("X speed of bullet: " + xSpeed); 
-         System.out.println("Y speed of bullet: " + ySpeed); 
+        // System.out.println("X speed of bullet: " + xSpeed); 
+         //System.out.println("Y speed of bullet: " + ySpeed); 
          
          
          if( (theta < 0.38) ) {
            
-           bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+       //    bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+        // bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+        // bullets[bulletsInAction].setShotFrom("Shotgun");
+        // bulletsInAction++;
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20+10);
-         bullets[bulletsInAction].status = true;
+          Bullet tempBullet = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         playerBullets.add(tempBullet); 
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20+20);
-         bullets[bulletsInAction].status = true;
+       //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20+10);
+      //  bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+        // bulletsInAction++;
          
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20-10);
-         bullets[bulletsInAction].status = true;
+          Bullet tempBullet2 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20+10, true, weaponUsed.getMaxDamage(), "Shotgun");
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         playerBullets.add(tempBullet2); 
          
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20-20);
-         bullets[bulletsInAction].status = true;
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20+20);
+       //  bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+        // bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+        // bullets[bulletsInAction].setShotFrom("Shotgun");
+        // bulletsInAction++;
+         
+         
+         Bullet tempBullet3 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20+20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet3); 
+         
+         
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20); 
+        // bullets[bulletsInAction].setLocY(playerY*20-10);
+        // bullets[bulletsInAction].status = true;
+         
+        // bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+        // bullets[bulletsInAction].setShotFrom("Shotgun");
+        // bulletsInAction++;
+         
+         
+          Bullet tempBullet4 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20-10, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet4); 
+         
+         
+       //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20-20);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+         
+          Bullet tempBullet5 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20-20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet5); 
            
          shotGunSickness = true;
         
          
          } else {
            
-            bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+          //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20+10); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+           Bullet tempBullet = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20+20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+         playerBullets.add(tempBullet); 
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20+10); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
+        // bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+        // bulletsInAction++;
+         
+         
+         Bullet tempBullet2 = new Bullet(xSpeed*2, ySpeed*2, playerX*20+10, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet2); 
+         
+         
+      //   bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20+20); 
+        // bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+            Bullet tempBullet3 = new Bullet(xSpeed*2, ySpeed*2, playerX*20+20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet3); 
          
         
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20-10); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20-10); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
+        // bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+        // bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
          
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20-20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+            Bullet tempBullet4 = new Bullet(xSpeed*2, ySpeed*2, playerX*20-10, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         playerBullets.add(tempBullet4); 
+         
+         
+       //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20-20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+       
+       Bullet tempBullet5 = new Bullet(xSpeed*2, ySpeed*2, playerX*20-20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet5); 
          
          shotGunSickness = true;
+         
+         
+         
            
          }
         
@@ -1667,7 +2416,7 @@ class GameBoard {
     } else if (playerY < shootingAtY) { //the player is shooting down
    
         if(playerX <= shootingAtX) { //the player is shooting to the right and down
-           println("the player is shooting to the right and down");
+         //  println("the player is shooting to the right and down");
            
             players[0].activeShotgun.useAmmo(1);
            
@@ -1678,7 +2427,7 @@ class GameBoard {
          
            theta = asin(  (a/hypotenuse) );
          
-           System.out.println("Theta: " + theta);
+          // System.out.println("Theta: " + theta);
            
            
            //These next lines essentially calculate the appropriate X and Y components
@@ -1687,7 +2436,7 @@ class GameBoard {
          
            ratio = theta / 1.570796326;  //pi/2 
          
-           println("Ratio: " + ratio); 
+        //   println("Ratio: " + ratio); 
            ratio = ratio*100;
          
            yPercentage = ratio; 
@@ -1696,119 +2445,170 @@ class GameBoard {
            ySpeed = yPercentage/10; 
            xSpeed = xPercentage/10;
          
-           System.out.println("X speed of bullet: " + xSpeed); 
-           System.out.println("Y speed of bullet: " + ySpeed); 
+          // System.out.println("X speed of bullet: " + xSpeed); 
+          // System.out.println("Y speed of bullet: " + ySpeed); 
            
            if ( (theta < 0.39) ) {
              
-             bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+             //bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20); 
+        // bullets[bulletsInAction].setLocY(playerY*20);
+        // bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
-         
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20+10);
-         bullets[bulletsInAction].status = true;
-         
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
-         
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20+20);
-         bullets[bulletsInAction].status = true;
-         
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
          
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20-10);
-         bullets[bulletsInAction].status = true;
+         Bullet tempBullet = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         playerBullets.add(tempBullet); 
+         
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20); 
+        // bullets[bulletsInAction].setLocY(playerY*20+10);
+        // bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
          
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20-20);
-         bullets[bulletsInAction].status = true;
+          Bullet tempBullet2 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20+10, true, weaponUsed.getMaxDamage(), "Shotgun");
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         playerBullets.add(tempBullet2); 
+         
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20+20);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+        // bullets[bulletsInAction].setShotFrom("Shotgun");
+        // bulletsInAction++;
+         
+         
+           Bullet tempBullet3 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20+20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet3); 
+         
+         
+       //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20-10);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+          Bullet tempBullet4 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20-10, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet4); 
+         
+         
+         
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20); 
+        // bullets[bulletsInAction].setLocY(playerY*20-20);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+        // bulletsInAction++;
+         
+         
+          Bullet tempBullet5 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20-20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet5); 
+         
            
            shotGunSickness = true;
            
           
            } else {
-              bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+             
+             // bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20+10); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+           Bullet tempBullet = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         playerBullets.add(tempBullet); 
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20+20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20+10); 
+        // bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
          
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+         
+          Bullet tempBullet2 = new Bullet(xSpeed*2, ySpeed*2, playerX*20+10, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet2); 
+         
+         
+       //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20+20); 
+        // bullets[bulletsInAction].setLocY(playerY*20);
+        // bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+         
+          Bullet tempBullet3 = new Bullet(xSpeed*2, ySpeed*2, playerX*20+20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet3); 
       
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20-10); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+       //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20-10); 
+        // bullets[bulletsInAction].setLocY(playerY*20);
+        // bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
          
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20-20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+         Bullet tempBullet4 = new Bullet(xSpeed*2, ySpeed*2, playerX*20-10, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         playerBullets.add(tempBullet4); 
+         
+       //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20-20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+      //   bulletsInAction++;
+         
+         
+         Bullet tempBullet5 = new Bullet(xSpeed*2, ySpeed*2, playerX*20-20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet5); 
          
          shotGunSickness = true;
          
@@ -1818,7 +2618,7 @@ class GameBoard {
     
       
         } else if (playerX > shootingAtX) { //the player is shooting to the left and down
-           println("the player is shooting to the left and down");
+          // println("the player is shooting to the left and down");
            
            
             players[0].activeShotgun.useAmmo(1);
@@ -1831,7 +2631,7 @@ class GameBoard {
          
            theta = asin(  (a/hypotenuse) );
          
-           System.out.println("Theta: " + theta);        
+         //  System.out.println("Theta: " + theta);        
            
            //These next lines essentially calculate the appropriate X and Y components
            //of the bullet, in order to generate the appropriate X and Y speeds,
@@ -1839,7 +2639,7 @@ class GameBoard {
          
            ratio = theta / 1.570796326;  //pi/2 
          
-           println("Ratio: " + ratio); 
+        //   println("Ratio: " + ratio); 
            ratio = ratio*100;
          
            yPercentage = ratio; 
@@ -1851,62 +2651,89 @@ class GameBoard {
            //negative X speed for this case
            xSpeed = xSpeed - xSpeed*2; 
          
-           System.out.println("X speed of bullet: " + xSpeed); 
-           System.out.println("Y speed of bullet: " + ySpeed); 
+          // System.out.println("X speed of bullet: " + xSpeed); 
+          // System.out.println("Y speed of bullet: " + ySpeed); 
            
            if( (theta < 0.38) ) {
              
-             bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+            // bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
-         
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20+10);
-         bullets[bulletsInAction].status = true;
-         
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
-         
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20+20);
-         bullets[bulletsInAction].status = true;
-         
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+        // bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
          
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20-10);
-         bullets[bulletsInAction].status = true;
+          Bullet tempBullet = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         playerBullets.add(tempBullet); 
          
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20-20);
-         bullets[bulletsInAction].status = true;
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+        // bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20); 
+        // bullets[bulletsInAction].setLocY(playerY*20+10);
+       //  bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+      //   bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+         
+         Bullet tempBullet2 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20+10, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet2); 
+         
+       //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+      //   bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20); 
+        // bullets[bulletsInAction].setLocY(playerY*20+20);
+       //  bullets[bulletsInAction].status = true;
+         
+      //   bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+      //   bullets[bulletsInAction].setShotFrom("Shotgun");
+      //  bulletsInAction++;
+         
+         
+         Bullet tempBullet3 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20+20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet3); 
+         
+         
+         
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+        // bullets[bulletsInAction].setLocX(playerX*20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20-10);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+          Bullet tempBullet4 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20-10, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet4); 
+         
+         
+        // bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20); 
+        // bullets[bulletsInAction].setLocY(playerY*20-20);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+      //   bulletsInAction++;
+         
+         
+          Bullet tempBullet5 = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20-20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet5); 
+         
          
          shotGunSickness = true;
            
@@ -1914,57 +2741,84 @@ class GameBoard {
          
            } else {
              
-              bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+             // bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20); 
+      //   bullets[bulletsInAction].setLocY(playerY*20);
+      //   bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+      //   bullets[bulletsInAction].setShotFrom("Shotgun");
+      //   bulletsInAction++;
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20+10); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+         Bullet tempBullet = new Bullet(xSpeed*2, ySpeed*2, playerX*20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         playerBullets.add(tempBullet); 
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20+20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         
+       //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20+10); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+         
+          Bullet tempBullet2 = new Bullet(xSpeed*2, ySpeed*2, playerX*20+10, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet2); 
+         
+       //  bullets[bulletsInAction].setSpeedX(xSpeed); 
+       //  bullets[bulletsInAction].setSpeedY(ySpeed);
+       //  bullets[bulletsInAction].setLocX(playerX*20+20); 
+       //  bullets[bulletsInAction].setLocY(playerY*20);
+       //  bullets[bulletsInAction].status = true;
+         
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+       //  bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+         
+         Bullet tempBullet3 = new Bullet(xSpeed*2, ySpeed*2, playerX*20+20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet3); 
          
   
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20-10); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+      //   bullets[bulletsInAction].setSpeedX(xSpeed); 
+      //   bullets[bulletsInAction].setSpeedY(ySpeed);
+      //   bullets[bulletsInAction].setLocX(playerX*20-10); 
+      //   bullets[bulletsInAction].setLocY(playerY*20);
+       ///  bullets[bulletsInAction].status = true;
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+       //  bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+      //   bullets[bulletsInAction].setShotFrom("Shotgun");
+      //   bulletsInAction++;
          
          
-         bullets[bulletsInAction].setSpeedX(xSpeed); 
-         bullets[bulletsInAction].setSpeedY(ySpeed);
-         bullets[bulletsInAction].setLocX(playerX*20-20); 
-         bullets[bulletsInAction].setLocY(playerY*20);
-         bullets[bulletsInAction].status = true;
+          Bullet tempBullet4 = new Bullet(xSpeed*2, ySpeed*2, playerX*20-10, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
          
-         bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
-         bullets[bulletsInAction].setShotFrom("Shotgun");
-         bulletsInAction++;
+         playerBullets.add(tempBullet4); 
+         
+         
+         
+      //   bullets[bulletsInAction].setSpeedX(xSpeed); 
+      //   bullets[bulletsInAction].setSpeedY(ySpeed);
+      //   bullets[bulletsInAction].setLocX(playerX*20-20); 
+      //   bullets[bulletsInAction].setLocY(playerY*20);
+      //   bullets[bulletsInAction].status = true;
+         
+      //   bullets[bulletsInAction].setDamage(players[0].activeShotgun.getMaxDamage());;
+      //   bullets[bulletsInAction].setShotFrom("Shotgun");
+       //  bulletsInAction++;
+         
+         
+         Bullet tempBullet5 = new Bullet(xSpeed*2, ySpeed*2, playerX*20-20, playerY*20, true, weaponUsed.getMaxDamage(), "Shotgun");
+         
+         playerBullets.add(tempBullet5); 
              
              shotGunSickness = true; 
              
@@ -2053,26 +2907,27 @@ class GameBoard {
   
   void drawBullets() {
     
-    for(int i = 0; i < bulletsInAction; i++) {
+    for(int i = 0; i < playerBullets.size(); i++) {
       
-        if(bullets[i].status) {
+        if(playerBullets.get(i).status) {
         fill(#002AF2);
         
       
-        bullets[i].timesAnimated = bullets[i].timesAnimated + 1;
+        playerBullets.get(i).timesAnimated = playerBullets.get(i).timesAnimated + 1;
         
-        if( (bullets[i].timesAnimated == 6) & (bullets[i].getShotFrom() == "Shotgun")) {
+        if( (playerBullets.get(i).timesAnimated == 6) & (playerBullets.get(i).getShotFrom() == "Shotgun")) {
           
-          bullets[i].status = false;
-          this.checkBulletRedundancy();
+          playerBullets.get(i).status = false;
+          //this.checkBulletRedundancy();
         }
       
-        bullets[i].xCoor += (bullets[i].speedX); 
-        bullets[i].yCoor += (bullets[i].speedY);
-      
+        if(playerBullets.get(i).status) {
+        playerBullets.get(i).xCoor += (playerBullets.get(i).speedX); 
+        playerBullets.get(i).yCoor += (playerBullets.get(i).speedY);
+        }
         //line(i*20+10,j*20+10,i*20,j*20);
       
-        circle(bullets[i].xCoor,bullets[i].yCoor,bulletSize);
+        circle(playerBullets.get(i).xCoor,playerBullets.get(i).yCoor,bulletSize);
        // line(bullets[i].xCoor,bullets[i].yCoor,bullets[i].xCoor-5,bullets[i].yCoor+5);
       
       }
@@ -2114,6 +2969,7 @@ class GameBoard {
         
         println("Giving Iron Shotgun"); 
         players[0].setShotgun(weaponAvailable[4]); 
+        players[0].getShotty().setMaxDamage(300);
         players[0].addIron(-100); 
         
       }
@@ -2130,6 +2986,21 @@ class GameBoard {
       }
       
     }
+  }
+  
+  
+  void addSuperPowerAnimateTick(int animateTick) {
+    
+     animateTick = (int) animateTick/9;
+    //for each animateTick that is to be added ontop of the potion box
+    for(int i = 0; i < animateTick; i++) {
+      
+      fill(100); 
+      rect(320,890-i,80,1);
+      
+    }
+    
+    
   }
   
   //adds one of 300 ticks to the potion regeneration animation
@@ -2339,8 +3210,27 @@ class GameBoard {
     } 
     rect(50,850,80,80);
     fill(0);
-    text("Gun",40,850);
-    text(""+player.activeTommy.ammo,40,870);
+    
+    if(player.activeTommy.tier=="Wood") {
+    
+       image(imageList[27],12,850);
+       
+    } else if (player.activeTommy.tier=="Iron") {
+       
+       image(imageList[28],12,850);
+       
+    } else {
+       
+       image(imageList[29],12,850);
+       
+    }
+    
+    //text("Gun",40,850);
+    text(""+player.activeTommy.ammo,40,830);
+    
+    
+    
+    
     fill(#B2A89C);
     
     //shotgun box
@@ -2350,8 +3240,24 @@ class GameBoard {
     }
     rect(140,850,80,80);
     fill(0);
-    text("Shotgun",120,850);
-    text(""+player.activeShotgun.ammo,120,870);
+    
+    if(player.activeShotgun.tier=="Wood") {
+    
+       image(imageList[30],104,850);
+       
+    } else if (player.activeShotgun.tier=="Iron") {
+       
+       image(imageList[31],104,850);
+       
+    } else {
+       
+       image(imageList[32],104,850);
+       
+    }
+    
+    
+    //text("Shotgun",120,850);
+    text(""+player.activeShotgun.ammo,120,830);
     fill(#B2A89C);
     
     
@@ -2360,8 +3266,13 @@ class GameBoard {
       fill(#00FCE5);
     } 
     rect(230,850,80,80);
-    fill(0);
-    text("Pickaxe",210,850);
+    fill(0); 
+    
+    
+    //pickaxe image
+    image(imageList[26],197,817); 
+    
+    //text("Pickaxe",210,850);
     fill(#B2A89C);
     
     //hammer box
@@ -2370,7 +3281,10 @@ class GameBoard {
     } 
     rect(320,850,80,80);
     fill(0);
-    text("Hammer",300,850);
+    
+    //superpower image
+    image(imageList[40],287,817);
+    
     fill(#B2A89C);
     
     //potion box
@@ -2381,7 +3295,11 @@ class GameBoard {
     }
     rect(410,850,80,80);
     fill(0);
-    text("Potion",400,850);
+    
+    //potion image
+    image(imageList[25],377,817);
+    
+    //text("Potion",400,850);
     fill(#B2A89C);
     //END: makes the toolbar appear
     
@@ -2405,6 +3323,7 @@ class GameBoard {
   //this displays all of the tiles on the gameboard
   void display() {
     
+    
     //display all of the blocks
     for(int i = 0; i < 70; i++) {
       
@@ -2422,28 +3341,232 @@ class GameBoard {
            fill(#A0681F); 
            tiles[j][i].nothing();
          }
+      
          
          
-         rect(i*20+10,j*20+10,20,20);
+         //rect(i*20+10,j*20+10,20,20);
          
          
          //if the tile has been hit once
-         if(tiles[j][i].health == 75) {
-           line(i*20+10,j*20+10,i*20,j*20);
-         }
+         //if(tiles[j][i].health == 75) {
+           //line(i*20+10,j*20+10,i*20,j*20);
+         //}
          //if the tile has been damaged halfway
-         if(tiles[j][i].health == 50) {
-           line(i*20+20,j*20+20,i*20,j*20);
-         }
+         //if(tiles[j][i].health == 50) {
+           //line(i*20+20,j*20+20,i*20,j*20);
+         //}
          //if the tile has been damaged 3/4 of the way
-         if(tiles[j][i].health == 25) {
-           line(i*20+20,j*20+20,i*20,j*20);
-           line(i*20+20,j*20,i*20,j*20+20);
-         }
+        // if(tiles[j][i].health == 25) {
+           //line(i*20+20,j*20+20,i*20,j*20);
+           //line(i*20+20,j*20,i*20,j*20+20);
+         //}
       }
     }
     
+    
     showImages();
+ }
+ 
+ 
+ void generateBiome() {
+   
+   //reset the difficulty for the new biome's enemies to progress
+   difficulty = 0; 
+   
+   Random r = new Random();
+   
+   System.out.println("Generating new biome");
+    
+   int streamSize = 2800; 
+   int start = 0; 
+   int bound = 2799; 
+   int goldBound = 100;
+   int ironBound = 200;
+   int goldMin = 25; 
+   int ironMin = 50;
+   int resourceXYMin = 2; //so that cluster placed resources dont out of bounds error 
+   int lavaMin = 50; 
+   int lavaBound = 200;
+   
+   
+   //generateBiome is only called after the initial biome has been defeated so the player should now have access to the potion and superpower upgrades
+   int potionUpgradeMin = 10; 
+   int potionUpgradeBound = 20;
+   
+   
+   int superPowerMin = 10; 
+   int superPowerBound = 20; 
+    
+   r.ints(streamSize, start, bound);
+   
+   //initialize all of the tiles in the array used to represent our gameboard
+    for(int i = 0; i < 40; i++) {
+      
+      for(int j = 0; j < 70; j++) {
+        tiles[i][j] = new Tile();
+      }
+      
+    }
+   
+   
+   //GENERATE THE NEW BIOME
+   //reset all of the pieces to steel default
+   for (int i = 0; i < 70; i++) {
+     
+     for(int j = 0; j < 40; j++) {
+       
+       tiles[j][i].steel();
+       
+     }
+     
+   }
+   
+   //GOLD GENERATION
+    int goldPieces = r.nextInt(goldBound+1-goldMin) + goldMin;
+    //println("gold pieces" + goldPieces);
+    
+    int goldplaceCounter = 0;
+    
+    int goldClusters = goldPieces/5; 
+    
+    //println("gold clusters" + goldClusters);
+    while(goldplaceCounter < goldClusters) {
+      
+      int x = r.nextInt(39-resourceXYMin) + resourceXYMin;
+      int y = r.nextInt(69-resourceXYMin) + resourceXYMin;
+      
+      tiles[x][y].gold();
+      tiles[x+1][y+1].gold();
+      tiles[x-1][y-1].gold();
+      tiles[x][y+1].gold();
+      tiles[x][y-1].gold();
+      tiles[x+1][y].gold();
+      tiles[x-1][y].gold();
+      
+      goldplaceCounter++;
+    }
+    //GOLD GENERATION DONE
+    //IRON GENERATION
+    int ironPieces = r.nextInt(ironBound+1-ironMin) + ironMin;
+    //println("iron pieces" + ironPieces);
+    
+    int ironplaceCounter = 0;
+    
+    int ironClusters = ironPieces/5; 
+    
+    //println("iron clusters" + ironClusters);
+    while(ironplaceCounter < ironClusters) {
+      
+      int x = r.nextInt(39-resourceXYMin) + resourceXYMin;
+      int y = r.nextInt(69-resourceXYMin) + resourceXYMin;
+      
+      tiles[x][y].iron();
+      tiles[x+1][y+1].iron();
+      tiles[x-1][y-1].iron();
+      tiles[x][y+1].iron();
+      tiles[x][y-1].iron();
+      tiles[x+1][y].iron();
+      tiles[x-1][y].iron();
+      
+      ironplaceCounter++;
+    }
+    //IRON GENERATION DONE
+    
+    
+    
+    //LAVA GENERATION
+    int lavaPieces = r.nextInt(lavaBound+1-lavaMin) + lavaMin;
+    //println("lava tiles" + lavaPieces);
+    
+    int lavaplaceCounter = 0;
+    
+    int lavaClusters = lavaPieces/5; 
+    
+    //println("lava clusters" + lavaClusters);
+    while(lavaplaceCounter < lavaClusters) {
+      
+      int x = r.nextInt(39-resourceXYMin) + resourceXYMin;
+      int y = r.nextInt(69-resourceXYMin) + resourceXYMin;
+      
+      tiles[x][y].lava();
+      tiles[x+1][y+1].lava();
+      tiles[x-1][y-1].lava();
+      tiles[x][y+1].lava();
+      tiles[x][y-1].lava();
+      tiles[x+1][y].lava();
+      tiles[x-1][y].lava();
+      
+      lavaplaceCounter++;
+    }
+    //LAVA GENERATION DONE
+    
+    
+    //SUPER POWER UPGRADE GENERATION
+    int superPowerPieces = r.nextInt(superPowerBound+1-superPowerMin) + superPowerMin;
+    //println("lava tiles" + lavaPieces);
+    
+    int superPowerplaceCounter = 0;
+    
+    int superPowerClusters = superPowerPieces/5; 
+    
+    //println("lava clusters" + lavaClusters);
+    while(superPowerplaceCounter < superPowerClusters) {
+      
+      int x = r.nextInt(39-resourceXYMin) + resourceXYMin;
+      int y = r.nextInt(69-resourceXYMin) + resourceXYMin;
+      
+      tiles[x][y].superPower();
+      tiles[x+1][y+1].superPower();
+      tiles[x-1][y-1].superPower();
+      tiles[x][y+1].superPower();
+      tiles[x][y-1].superPower();
+      tiles[x+1][y].superPower();
+      tiles[x-1][y].superPower();
+      
+      superPowerplaceCounter++;
+    }
+    
+    
+    
+    
+    //SUPER POWER UPGRADE GENERATION DONE
+    
+    
+    //POTION UPGRADE GENERATION
+    int potionUpgradePieces = r.nextInt(potionUpgradeBound+1-potionUpgradeMin) + potionUpgradeMin;
+    //println("lava tiles" + lavaPieces);
+    
+    int potionUpgradeplaceCounter = 0;
+    
+    int potionUpgradeClusters = potionUpgradePieces/5; 
+    
+    //println("lava clusters" + lavaClusters);
+    while(potionUpgradeplaceCounter < potionUpgradeClusters) {
+      
+      int x = r.nextInt(39-resourceXYMin) + resourceXYMin;
+      int y = r.nextInt(69-resourceXYMin) + resourceXYMin;
+      
+      tiles[x][y].potionUpgrade();
+      tiles[x+1][y+1].potionUpgrade();
+      tiles[x-1][y-1].potionUpgrade();
+      tiles[x][y+1].potionUpgrade();
+      tiles[x][y-1].potionUpgrade();
+      tiles[x+1][y].potionUpgrade();
+      tiles[x-1][y].potionUpgrade();
+      
+      potionUpgradeplaceCounter++;
+    }
+    
+    
+    
+    
+    
+    //POTION GENERATION DONE
+   
+   this.currentBiome = "steel";
+   
+   plantTreesInSteelBiome();
+   
  }
  
  
@@ -2455,11 +3578,11 @@ class GameBoard {
     int bound = 2799; 
     int goldBound = 100;
     int ironBound = 200;
-    int goldMin = 25; 
-    int ironMin = 50;
+    int goldMin = 35; 
+    int ironMin = 75;
     int resourceXYMin = 2; //so that cluster placed resources dont out of bounds error 
-    int lavaMin = 50; 
-    int lavaBound = 200;
+    int lavaMin = 30; 
+    int lavaBound = 100;
     
     r.ints(streamSize, start, bound);
     
@@ -2643,6 +3766,18 @@ class GameBoard {
             
             image(imageList[14],j*20,i*20);
             
+          } else if (tiles[i][j].getType().equals("Steel")) {
+            
+            image(imageList[34],j*20,i*20);
+            
+          } else if (tiles[i][j].getType().equals("SuperPower")) {
+            
+            image(imageList[36],j*20,i*20); 
+            
+          } else if (tiles[i][j].getType().equals("PotionUpgrade")) {
+            
+            image(imageList[35],j*20,i*20);
+            
           }
             
         }
@@ -2689,6 +3824,46 @@ class GameBoard {
     
     
       //TREE GENERATION DONE
+      
+      
+    
+  }
+  
+  
+  void plantTreesInSteelBiome() {
+    
+    int choice = 0;
+    //TREE GENERATION START
+    
+    //start by finding all of the remaining spots that are not filled in, they are steel. 
+    //only plant trees once per biome creation
+    if(!plantedTreesInSteel) {
+      println("Planting trees in steel");
+    
+      for(int i = 0; i<40; i++) {
+       
+        for(int j = 0; j<70; j++) {
+        
+          //if the tile is dirt
+          if(tiles[i][j].getType().equals("Steel")) {
+          
+            //choose between 0,1,2,3,4,5,6 ... 15
+            choice = (int) random(16);
+          
+            //turn one sixteenth (probabilistically) of the steel tiles to a tree tile
+            if(choice == 0) {
+               tiles[i][j].tree(); 
+            }
+            
+          }
+        
+        
+        }
+      
+      }
+      plantedTreesInSteel = true;
+    }
+    
     
   }
   

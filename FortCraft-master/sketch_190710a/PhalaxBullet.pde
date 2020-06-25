@@ -1,4 +1,4 @@
-class FlowerBullet {
+class PhalaxBullet {
   
   float speedX; 
   float speedY;
@@ -14,7 +14,7 @@ class FlowerBullet {
   
   boolean status = true;
   
-  FlowerBullet() {
+  PhalaxBullet() {
     speedX = 0; 
     speedY = 0;
     speedXMultiple = 5;
@@ -80,26 +80,26 @@ class FlowerBullet {
   //determines if the bullet is on the screen or not
   void checkStatus() {
     
-    if (xCoor <= 0) {
+    if (xCoor < 0) {
       this.status = false; 
     }
     
-    if (yCoor <= 0) {
+    if (yCoor < 0) {
       this.status = false; 
     }
     
-    if (xCoor >= 1400) {
+    if (xCoor > 1400) {
       this.status = false; 
     }
     
-    if (yCoor >= 800) {
+    if (yCoor > 800) {
       this.status = false; 
     }
     
     
   }
   
-  FlowerBullet(float spX, float spY, int sze, int x, int y, int d) {
+  PhalaxBullet(float spX, float spY, int sze, int x, int y, int d) {
     speedX = spX;
     speedY = spY; 
     size = sze; 
