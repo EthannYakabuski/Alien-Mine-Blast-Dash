@@ -62,8 +62,8 @@ STEEL BIOME:
 
 ELECTRO QUAD: Similar AI but physically larger than robots, and shoot 3 times as many bullets. When they are eliminated, they break into 2 ELECTRO DUO's
 
-ELECTRO DUO: Similar AI but physicall larger than flowers, and shoot larger more powerful bullets. When they are eliminated, they break into 4 ELECTRO MAN
+ELECTRO DUO: Similar AI but physicaly larger than flowers, and shoot larger more powerful bullets. When they are eliminated, they break into 4 ELECTRO MAN
 
 ELECTRO MAN: Similar AI and size to ANTS. They do twice the damage though!
 
-
+ELECTRO KING: Steel biome BOSS. Moves and shoots like nothing else you have seen. Can paralyze you to make you unable to move as you plead for the sweet release of game over. 
