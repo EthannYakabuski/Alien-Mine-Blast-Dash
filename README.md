@@ -25,16 +25,23 @@ Use hotkeys 1,2,3,4,5 to access your toolbar
 5: Potion: Timed cooldown, but provides a quick boost to your health bar, hit this hotkey and you will automatically drink a potion. Can be upgraded starting in the second biome. 
 
 HOTKEYS:
+
 e: apply wooden armor
+
 r: apply iron armor
+
 t: apply gold armor
 
 f: wood tommy upgrade
+
 g: iron tommy upgrade
+
 h: gold tommy upgrade
 
 c: wood shotgun upgrade
+
 v: iron shotgun upgrade
+
 b: gold shotgun upgrade
 
 
@@ -42,13 +49,21 @@ ARMOR and WEAPON UPGRADES:
 Click on armor and weapon updgrade boxes in the UI to equip them or optionally use the provided hotkeys, will only appear in your UI if you have the available materials
 
 GRASS BIOME: 
+
 ANTS: These enemies will move towards you making 4 decisions per second, get caught on the same square as them and receive 1 damage per frame
+
 FLOWERS: These enemies are a little slower, making 2 decisions per second, they will move towards you until they are in the same row, or column. Once they see you, they will begin to fire large powerful bullets at you dealing 5 damage on contact.
+
 ROBOTS: These deadly enemies will make you plead for mercy. Making 4 decisions per second, they will quickly close the distance and shoot well timed deadly bullets at you from any angle once they are close enough. 
+
 PHALAX: Grass biome BOSS. Moves and shoots similar to a conjunction of all creatures from this biome. 
 
 STEEL BIOME: 
+
 ELECTRO QUAD: Similar AI but physically larger than robots, and shoot 3 times as many bullets. When they are eliminated, they break into 2 ELECTRO DUO's
+
 ELECTRO DUO: Similar AI but physicall larger than flowers, and shoot larger more powerful bullets. When they are eliminated, they break into 4 ELECTRO MAN
+
 ELECTRO MAN: Similar AI and size to ANTS. They do twice the damage though!
+
 
