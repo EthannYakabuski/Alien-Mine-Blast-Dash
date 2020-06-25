@@ -7,8 +7,6 @@ HOW TO INSTALL:
 3. Find file sketch_190710a.pde, right click and open with processing
 4. If this does not work for you please email me at piledrivegames /(@)\ gmail.com (remove extra characters surrounding the @, this is to avoid bots picking up my email address)
 
-# FortCraft
-2D miner/shooter and builder programmed in processing. 
 
 HOW TO PLAY:
 
